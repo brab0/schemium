@@ -1,7 +1,7 @@
 {
-  "name": "node-client-builder",
-  "version": "0.0.2",
-  "description": "Build Node Clients",
+  "name": "cli-builder",
+  "version": "0.0.1",
+  "description": "Build Command Line Interface applications on a simple way.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

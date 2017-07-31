@@ -1,6 +1,6 @@
 CLI Builder
 ==============
-Build Command Line Interface aplications
+Build Command Line Interface applications on a simple way.
 
 ## Instalation
     $ npm install cli-builder
