@@ -1,0 +1,19 @@
+{
+  "name": "node-client-builder",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brab0/node-client-builder.git"
+  },
+  "author": "Rodrigo Brabo <brabo.rodrigo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brab0/node-client-builder/issues"
+  },
+  "homepage": "https://github.com/brab0/node-client-builder#readme"
+}
