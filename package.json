@@ -4,6 +4,7 @@
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "index.js",
   "scripts": {
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,15 @@
   "bugs": {
     "url": "https://github.com/brab0/node-client-builder/issues"
   },
-  "homepage": "https://github.com/brab0/node-client-builder#readme"
+  "homepage": "https://github.com/brab0/node-client-builder#readme",
+  "bin": {
+    "schemium": "index.js"
+  },
+  "preferGlobal": true,
+  "dependencies": {
+    "abbrev": "^1.1.0",
+    "findup-sync": "^1.0.0",
+    "mout": "^1.0.0",
+    "nopt": "^4.0.1"
+  }
 }
