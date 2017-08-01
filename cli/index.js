@@ -1,16 +1,17 @@
-#!/usr/bin/env node
-
 let commands = [];
 let config = {};
 
-function requireCommands(){
-    require('../commands/export');
-    require('../commands/import');
+const requireFiles = require('./util/require-files');
+
+function requireCommands(config){
+    requireFiles(config.commands).forEach(command => {
+        console.log(command)
+        require(command);
+    });
 }
 
-module.exports.config = function(config) {
-    config = config;
-    requireCommands();
+module.exports.config = function(config) {    
+    requireCommands(config);
 }
 
 module.exports.exec = function() {

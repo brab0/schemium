@@ -1,9 +1,11 @@
+#!/usr/bin/env node
+
 const cli = require('./cli');
 
 cli.config({
     process : "schemium",
     default: "help",
-    commands : "commands"
+    commands : "/**/commands/*.js"
 })
 
 cli.exec();
