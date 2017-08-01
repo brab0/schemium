@@ -1,10 +1,8 @@
-const cli = require('../cli');
-
-const main = function(options, config) {
-    process.stdout.write("importing...\n");
+function main() {
+    console.log("importing...");
 }
 
-cli.addCommand({
+require('../cli').addCommand({
     name: 'import',
     main : main,
     description : "Imports a Database schema",

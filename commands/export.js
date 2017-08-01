@@ -1,16 +1,21 @@
-const cli = require('../cli');
-
-const main = function(options, config) {
-    process.stdout.write("exporting...\n");
+function main(options) {
+    console.log("exporting with: " + options);
 }
 
-cli.addCommand({
+require('../cli').addCommand({
     name: 'export',
     main : main,
     description : "Exports a Database schema",
-    options : [{
-        shorthand:   "-C",
-        flag:        "--complete",
-        description: "exports with data"
-    }]
+    options : {
+        "get-content" : {
+            shorthand: "-C",
+            type: String,
+            description: "exports with data"
+        },
+        "complete" : {
+            shorthand: "-C",
+            type: Boolean,
+            description: "exports with data"
+        }
+    }
 });

@@ -1,95 +1,49 @@
+const mout = require('mout');
+const nopt = require('nopt');
+
+
 let commands = [];
 let config = {};
 
-const requireFiles = require('./util/require-files');
+function init(config) {    
+    require('require-files').only(config.commands.path);
 
-function requireCommands(config){
-    requireFiles(config.commands).forEach(command => {
-        console.log(command)
-        require(command);
-    });
+    process.bin = process.title = config.process_title;
+
+    return this;
 }
 
-module.exports.config = function(config) {    
-    requireCommands(config);
-}
-
-module.exports.exec = function() {
-    console.log(commands)
-}
-
-module.exports.addCommand = function(schema){    
+function addCommand(schema) {    
     commands.push(schema);
-};
+}
 
+function exec(argc = null) {
+    let args = process.argv || argc && argc.split(' ');
+    
+    executeCommandLine(commands, args);
+}
 
+function getVersion() {
+    return require(process.cwd() + '/package.json').version;
+}
 
-    // const commands = require('./commands');
-    // const version = require('./version');
-    // const abbreviations = require('./util/abbreviations')(commands);
+function executeCommandLine(commands, args){        
 
-    // module.exports = {
-    //     version: version,
-    //     commands: commands,
-    //     abbreviations: abbreviations
-    // };
-    // process.bin = process.title = 'schemium';
+    const command = commands.filter(function(cmd) {
+        return args.indexOf(cmd.name) !== -1;
+    })[0];
+    
+    console.log(nopt(command.options.map(function(opt) { return }), null, args, 2))
 
-    // var mout = require('mout');
+    const options = command.options.filter(function(opt) {
+        return args.indexOf(opt.flag) !== -1 || args.indexOf(opt.shorthand) !== -1;
+    });
 
-    // var schemium = require('../');
-    // var version = require('../lib/version');
-    // var cli = require('../lib/util/cli');
+    command && command.main(options);
+}
 
-    // var command;
-    // var commandFunc;
-
-    // var options = cli.readOptions({
-    //     'version': { type: Boolean, shorthand: 'v' },
-    //     'help': { type: Boolean, shorthand: 'h' }
-    // });
-
-    // // Handle print of version
-    // if (options.version) {
-    //     process.stdout.write(version + '\n');
-    //     process.exit();
-    // }
-
-    // // Get the command to execute
-    // while (options.argv.remain.length) {
-    //     command = options.argv.remain.join(' ');
-
-    //     // Alias lookup
-    //     if (schemium.abbreviations[command]) {
-    //         command = schemium.abbreviations[command].replace(/\s/g, '.');
-    //         break;
-    //     }
-
-    //     command = command.replace(/\s/g, '.');
-
-    //     // Direct lookup
-    //     if (mout.object.has(schemium.commands, command)) {
-    //         break;
-    //     }
-
-    //     options.argv.remain.pop();
-    // }
-
-    // // Execute the command
-    // commandFunc = command && mout.object.get(schemium.commands, command);
-    // command = command && command.replace(/\./g, ' ');
-
-    // if (!commandFunc) {
-    //     logger = schemium.commands.help();
-    //     command = 'help';
-    // } else if (options.help) {
-    //     logger = schemium.commands.help(command);
-    //     command = 'help';
-    // } else {
-    //     logger = commandFunc(process.argv);
-            
-    //     if (!logger) {
-    //         logger = schemium.commands.help(command);
-    //         command = 'help';
-    //     }
-    // }
+module.exports = {
+    init : init,
+    exec : exec,
+    addCommand : addCommand
+}
