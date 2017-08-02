@@ -31,7 +31,7 @@
   },
   "cliBuilder" : {
     "commands" : {
-      "path" : "commands/*.js",
+      "path" : "*.command.js",
       "default": "help"
     }
   }
