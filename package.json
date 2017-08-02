@@ -28,5 +28,11 @@
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
     "require-files": "^0.0.3"
+  },
+  "cliBuilder" : {
+    "commands" : {
+      "path" : "commands/*.js",
+      "default": "help"
+    }
   }
 }

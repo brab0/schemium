@@ -1,5 +1,5 @@
 function main(options) {
-    console.log("exporting with: " + options);
+    console.log("exporting with: ", options);
 }
 
 require('../cli').addCommand({
@@ -7,13 +7,11 @@ require('../cli').addCommand({
     main : main,
     description : "Exports a Database schema",
     options : {
-        "get-content" : {
-            shorthand: "-C",
+        "get-content" : {            
             type: String,
             description: "exports with data"
         },
-        "complete" : {
-            shorthand: "-C",
+        "procedures" : {            
             type: Boolean,
             description: "exports with data"
         }
