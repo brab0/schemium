@@ -1,8 +1,9 @@
 const mout = require('mout');
 const nopt = require('nopt');
-const config = require(process.cwd() + '/package.json')
 
-console.log(process.cwd() + '/package.json')
+let path = __dirname.split('/')
+const root = path.splice(0, path.length - 2).join('/');
+const config = require(root + '/package.json')
 
 var knownCommands = [];
 var index = 0;

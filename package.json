@@ -1,6 +1,6 @@
 {
   "name": "cli-builder",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,6 @@
   "dependencies": {
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
-    "require-files": "^0.0.3"
+    "require-files": "^0.0.4"
   }
 }
