@@ -1,6 +1,6 @@
 {
   "name": "cli-builder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "index.js",
   "scripts": {
@@ -9,18 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brab0/node-client-builder.git"
+    "url": "git+https://github.com/brab0/cli-builder.git"
   },
   "author": "Rodrigo Brabo <brabo.rodrigo@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/brab0/node-client-builder/issues"
+    "url": "https://github.com/brab0/cli-builder/issues"
   },
-  "homepage": "https://github.com/brab0/node-client-builder#readme",
-  "bin": {
-    "schemium": "index.js"
-  },
-  "preferGlobal": true,
+  "homepage": "https://github.com/brab0/cli-builder#readme",
   "dependencies": {
     "abbrev": "^1.1.0",
     "glob": "^7.1.2",
@@ -28,11 +24,5 @@
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
     "require-files": "^0.0.3"
-  },
-  "cliBuilder" : {
-    "commands" : {
-      "path" : "*.command.js",
-      "default": "help"
-    }
   }
 }
