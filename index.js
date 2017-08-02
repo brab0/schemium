@@ -2,6 +2,8 @@ const mout = require('mout');
 const nopt = require('nopt');
 const config = require(process.cwd() + '/package.json')
 
+console.log(process.cwd() + '/package.json')
+
 var knownCommands = [];
 var index = 0;
 
