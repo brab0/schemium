@@ -1,8 +1,8 @@
 {
   "name": "cli-builder",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Build Command Line Interface applications on a simple way.",
-  "main": "./api/index.js",
+  "main": "./bin/cli-builder.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

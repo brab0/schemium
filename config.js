@@ -1,6 +1,5 @@
 const path = __dirname.split('/');
 const root = path.splice(0, path.length - 2).join('/');
-
 const pkg = require(root + '/package.json');
 
 const config = {

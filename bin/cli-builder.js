@@ -1,15 +1,28 @@
 #!/usr/bin/env node
 
-const api = require('../api');
+const CommandList = require('../lib/CommandsList');
+const Command = require('../lib/Command');
 
-/* 
-*  needs to be exported before exec() runs. So when commands require 
-*  call this file again, they will know the function command()
-*/
+let commands = new CommandList();
 
-module.exports = {
-    command : api.command,
-    config : api.config
+const config = require('../config');
+
+function command(schema){    
+    commands.add(new Command(schema))
 }
 
-api.exec();
+function exec(){    
+    const CLI = require('../lib/CLI');    
+
+    process.bin = process.title = config.name;
+    
+    require('require-files').only(config.commands.path);
+
+    new CLI(commands).exec();
+}
+
+module.exports = {
+    exec : exec,
+    command : command,
+    config : config
+}
