@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const api = require('./api');
+const api = require('../api');
 
 /* 
 *  needs to be exported before exec() runs. So when commands require 

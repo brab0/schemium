@@ -1,10 +1,9 @@
 {
   "name": "cli-builder",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Build Command Line Interface applications on a simple way.",
-  "main": "index.js",
+  "main": "./api/index.js",
   "scripts": {
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,5 +20,8 @@
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
     "require-files": "^0.0.4"
+  },
+   "bin": {
+    "cli-builder": "./bin/cli-builder.js"
   }
 }
