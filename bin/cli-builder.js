@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const CommandList = require('../lib/CommandsList');
 const Command = require('../lib/Command');
 
@@ -8,7 +6,7 @@ let commands = new CommandList();
 const config = require('../config');
 
 function command(schema){    
-    commands.add(new Command(schema))
+    commands.add(new Command(schema));
 }
 
 function exec(){    
