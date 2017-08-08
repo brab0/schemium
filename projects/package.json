@@ -1,0 +1,14 @@
+{
+    "folder": "/var/www/cli-builder/projects",
+    "name": "projects",
+    "version": "0.0.1",
+    "description": "",
+    "repo": "",
+    "keywords": [
+        ""
+    ],
+    "author": "",
+    "bin": {
+        "projects": "/var/www/cli-builder/projects/bin/projects.js"
+    }
+}

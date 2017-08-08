@@ -4,7 +4,10 @@
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/cli-builder.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "node . init",
+    "help": "node . --help",
+    "version": "node . -v"
   },
   "repository": {
     "type": "git",
@@ -17,11 +20,18 @@
   },
   "homepage": "https://github.com/brab0/cli-builder#readme",
   "dependencies": {
+    "cli-builder-api": "0.0.5",
+    "mkdirp": "^0.5.1",
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
     "require-files": "^0.0.4"
   },
-   "bin": {
+  "bin": {
     "cli-builder": "./bin/cli-builder.js"
+  },
+  "cliBuilder": {
+    "commands": {
+      "path": "commands/*.js"
+    }
   }
 }
