@@ -50,6 +50,8 @@ var getDirName = require('path').dirname;
 var remoteOriginUrl = require('remote-origin-url');
 var defaultFolder = cwd + '/';
 var defaultName = "";
+var defaultBin = "";
+let pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
 
 try{
     defaultName = cwd.split('/')[cwd.split('/').length - 1];
@@ -57,7 +59,7 @@ try{
     defaultName = cwd;
 }
 
-let defaults = {    
+let defaults = {
     name : defaultName,
     version : "0.0.1",
     description : "",
@@ -65,18 +67,26 @@ let defaults = {
     bin : {},
     scripts : {
         test: "echo \"Error: no test specified\" && exit 1"
-    },       
-    keywords : [],
-    author : "",
-    license: "ISC",
+    },
     repository: {
         type: "git",
         url: ""
     },
+    keywords : [],
+    author : "",
+    license: "ISC",    
     homepage: "",
     bugs: {
         url: ""
-    }    
+    },
+    dependencies: {
+        "cli-builder-api": "^0.0.5"
+    },
+    cliBuilder: {
+        commands: {
+            path: "commands/*.js"
+        }
+    }
 };
 
 defaults.bin[defaultName] = defaults.main;
@@ -93,13 +103,11 @@ function prompt() {
         output: process.stdout
     });        
 
-    console.log("This utility will walk you through creating a package.json file.");
-    console.log("It only covers the most common items, and tries to guess sensible defaults.");
-    console.log("");
+    console.log("This utility will walk you through creating a Crafter's project.");        
     console.log("Press ^C at any time to quit.");
     console.log("");
 
-    rl.question(`root path: (${defaultFolder}) `, folder => {        
+    rl.question(`root path: (${defaultFolder}) `, folder => {
 
         folder = folder.trim().split(" ").join("-").toLowerCase()
 
@@ -118,39 +126,103 @@ function prompt() {
             defaultFolder += folder;
             defaults.bin = {};
             defaults.bin[defaultName] = './bin/' + defaultName + '.js';
+            defaultBin = defaultName;
             defaults.main = './bin/' + defaultName + '.js';
+
+            pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
         }
+        
+        fs.stat(pkg, function(err, stat) {
+            if(err == null) {                
+                rl.question(`\nThe path already exists and contains a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
+                    console.log("")
+                    if(confirm === "" || confirm === "y" || confirm === "yes"){                        
+                        setGitConf(rl, () => {
+                            createPackageJson(rl)
+                        })
+                    } else {
+                        console.log("Aborted!");
 
-        rl.question(`package name: (${defaults.name}) `, name => {
+                        rl.close();
+                    }
+                });
+            } else if(err.code == 'ENOENT') {
+                setGitConf(rl, () => {
+                    createPackageJson(rl)
+                })
+            } else {
+                console.log(err.code);
+            }
+        });      
+    });
+    
+
+    rl.on('close', () => {
+        console.log();
+        process.exit(0);        
+    });
+}
+
+function setGitConf(rl, cb){
+    
+    remoteOriginUrl(`${defaultFolder}.git/config`, (err, url) => {
+        if(url){            
+            defaults.repository.url = `git+${url}`;
+            defaults.homepage = `${url.split('.git').shift()}#readme`;            
+            defaults.bugs.url = `${url.split('.git').shift()}/issues`;
+
+            cb();
+        } else {
+            rl.question(`git url: `, git => {
+                defaults.repository.url = `git+${git}`;
+                defaults.homepage = `${git}#readme`;            
+                defaults.bugs.url = `${git}/issues`;
+
+                cb();
+            });
+        }
+    });
+}
+
+function createPackageJson(rl){
+    rl.question(`package name: (${defaults.name}) `, name => {
             
-            defaults.name = name || defaults.name;
-
-            rl.question(`version: (${defaults.version}) `, version => {
-                
-                defaults.version = version || defaults.version;
-                
-                rl.question(`description: `, description => {
-                                    
-                    defaults.description = description;
+        defaults.name = defaultBin = defaultName = name || defaults.name;
+        defaults.bin = {};
+        defaults.bin[defaultBin] = './bin/' + defaultBin + '.js';
+        defaults.main = './bin/' + defaultName + '.js';
+        
+        rl.question(`bin: (${defaultBin}) `, bin => {
+            
+            if(bin){
+                defaultBin = bin;
+                defaults.bin = {};
+                defaults.bin[bin] = './bin/' + defaultBin + '.js';
+            }                      
                     
-                    rl.question(`bin: (${defaultName}) `, bin => {
-                        defaults.bin = bin || defaults.bin;
-
-                        rl.question(`git repository: `, repo => {
-                            
-                            // defaults.repo = repo;
-
-                            rl.question(`keywords: `, keywords => {
+            rl.question(`version: (${defaults.version}) `, version => {
+            
+                defaults.version = version || defaults.version;
+            
+                rl.question(`description: `, description => {
                                 
-                                defaults.keywords = keywords.split(' ');
+                    defaults.description = description;
+                
+                    rl.question(`test command: `, test => {
 
-                                rl.question(`author: `, author => {
-                                    
-                                    defaults.author = author;                                
+                        defaults.scripts.test = test || defaults.scripts.test;                           
 
-                                    let pkg = `${defaultFolder}/package.json`;
+                        rl.question(`keywords: `, keywords => {
+                        
+                            defaults.keywords = keywords.split(' ');
 
-                                    pkg = pkg.replace('//','/', 'g')
+                            rl.question(`author: `, author => {
+                            
+                                defaults.author = author;                                
+
+                                rl.question(`license: (${defaults.license}) `, license => {
+                            
+                                    defaults.license = license || defaults.license;                                                                                                                           
 
                                     console.log(`About to write to ${pkg}`)
                                     console.log(JSON.stringify(defaults, null, 4))
@@ -158,12 +230,26 @@ function prompt() {
                                     rl.question(`Is this ok? (yes)  `, confirm => {                                        
 
                                         if(confirm === "" || confirm === "y" || confirm === "yes"){
-                                            writePkgJson(pkg, JSON.stringify(defaults, null, 4), function(err) {
+
+                                            console.log(pkg)
+                                            //package.json
+                                            writeAnyway(pkg, JSON.stringify(defaults, null, 4), function(err) {
                                                 if(err) return console.log(err);
+                                                
+                                                console.log(defaultFolder, defaults.bin[defaultBin])
+                                                //./bin/file.js
+                                                writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), JSON.stringify(defaults, null, 4), function(err) {
+                                                    if(err) return console.log(err);
 
-                                                console.log("Your project is ready!");
+                                                        //./commands/sample.js
+                                                        writeAnyway(pkg + '/commands/sample.js', JSON.stringify(defaults, null, 4), function(err) {
+                                                        if(err) return console.log(err);
 
-                                                rl.close();
+                                                        console.log("Your project is ready!");
+
+                                                        rl.close();
+                                                    });
+                                                });
                                             });
                                         } else {
                                             console.log("Aborted!");
@@ -179,14 +265,9 @@ function prompt() {
             });
         });
     });
-
-    rl.on('close', () => {
-        console.log();
-        process.exit(0);        
-    });
 }
 
-function writePkgJson(path, contents, cb) {
+function writeAnyway(path, contents, cb) {
     mkdirp(getDirName(path), function (err) {
         if (err) return cb(err);
 
