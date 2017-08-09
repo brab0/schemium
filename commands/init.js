@@ -197,13 +197,14 @@ function createPackageJson(rl){
                                                 writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), js, function(err) {
                                                     if(err) return console.log(err);                                                    
 
+                                                    console.log("Installing Dependencies...");
+                                                    
                                                     require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
                                                         if (error) {
                                                             console.error(`exec error: ${error}`);
                                                             return;
                                                         }
-
-                                                        console.log("Installing Dependencies...");
+                                                        
                                                         process.stdout.write(stdout)
                                                         console.log("Your project is ready!");
                                                         
