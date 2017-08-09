@@ -1,47 +1,3 @@
-// This utility will walk you through creating a package.json file.
-// It only covers the most common items, and tries to guess sensible defaults.
-
-// See `npm help json` for definitive documentation on these fields
-// and exactly what they do.
-
-// Use `npm install <pkg>` afterwards to install a package and
-// save it as a dependency in the package.json file.
-
-// Press ^C at any time to quit.
-// package name: (projects)
-// version: (1.0.0)
-// description:
-// entry point: (index.js)
-// test command:
-// git repository: https://github.com/brab0/cli-builder-api
-// keywords:
-// author:
-// license: (ISC)
-// About to write to /var/www/cli-builder/projects/package.json:
-
-// {
-//   "name": "projects",
-//   "version": "1.0.0",
-//   "description": "",
-//   "main": "index.js",
-//   "scripts": {
-//     "test": "echo \"Error: no test specified\" && exit 1"
-//   },
-//   "repository": {
-//     "type": "git",
-//     "url": "git+https://github.com/brab0/cli-builder-api.git"
-//   },
-//   "author": "",
-//   "license": "ISC",
-//   "bugs": {
-//     "url": "https://github.com/brab0/cli-builder-api/issues"
-//   },
-//   "homepage": "https://github.com/brab0/cli-builder-api#readme"
-// }
-
-
-// Is this ok? (yes)  
-
 const path = require('path');
 const cwd = process.cwd();
 var mkdirp = require('mkdirp');
@@ -191,7 +147,7 @@ function createPackageJson(rl){
         defaults.bin = {};
         defaults.bin[defaultBin] = './bin/' + defaultBin + '.js';
         defaults.main = './bin/' + defaultName + '.js';
-        
+
         rl.question(`bin: (${defaultBin}) `, bin => {
             
             if(bin){
@@ -231,24 +187,28 @@ function createPackageJson(rl){
 
                                         if(confirm === "" || confirm === "y" || confirm === "yes"){
 
-                                            console.log(pkg)
                                             //package.json
                                             writeAnyway(pkg, JSON.stringify(defaults, null, 4), function(err) {
                                                 if(err) return console.log(err);
                                                 
-                                                console.log(defaultFolder, defaults.bin[defaultBin])
+                                                var js = "#!/usr/bin/env node\rrequire('cli-builder-api').exec();"
+
                                                 //./bin/file.js
-                                                writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), JSON.stringify(defaults, null, 4), function(err) {
-                                                    if(err) return console.log(err);
+                                                writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), js, function(err) {
+                                                    if(err) return console.log(err);                                                    
 
-                                                        //./commands/sample.js
-                                                        writeAnyway(pkg + '/commands/sample.js', JSON.stringify(defaults, null, 4), function(err) {
-                                                        if(err) return console.log(err);
+                                                    require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
+                                                        if (error) {
+                                                            console.error(`exec error: ${error}`);
+                                                            return;
+                                                        }
 
+                                                        console.log("Installing Dependencies...");
+                                                        process.stdout.write(stdout)
                                                         console.log("Your project is ready!");
-
+                                                        
                                                         rl.close();
-                                                    });
+                                                    });                                                                                                                                                          
                                                 });
                                             });
                                         } else {
