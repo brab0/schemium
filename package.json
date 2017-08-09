@@ -24,6 +24,7 @@
     "mkdirp": "^0.5.1",
     "mout": "^1.0.0",
     "nopt": "^4.0.1",
+    "remote-origin-url": "^1.0.0",
     "require-files": "^0.0.4"
   },
   "bin": {

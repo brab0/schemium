@@ -40,14 +40,15 @@
 // }
 
 
-// Is this ok? (yes)
+// Is this ok? (yes)  
 
 const path = require('path');
 const cwd = process.cwd();
 var mkdirp = require('mkdirp');
 var fs = require('fs');
 var getDirName = require('path').dirname;
-
+var remoteOriginUrl = require('remote-origin-url');
+var defaultFolder = cwd + '/';
 var defaultName = "";
 
 try{
@@ -56,18 +57,29 @@ try{
     defaultName = cwd;
 }
 
-let defaults = {
-    folder : cwd + '/',
+let defaults = {    
     name : defaultName,
     version : "0.0.1",
     description : "",
-    repo : "",
+    main : "./bin/" + defaultName + '.js',
+    bin : {},
+    scripts : {
+        test: "echo \"Error: no test specified\" && exit 1"
+    },       
     keywords : [],
     author : "",
-    bin : {}
+    license: "ISC",
+    repository: {
+        type: "git",
+        url: ""
+    },
+    homepage: "",
+    bugs: {
+        url: ""
+    }    
 };
 
-defaults.bin[defaultName] = defaults.folder + '/bin'
+defaults.bin[defaultName] = defaults.main;
 
 function main() {
     prompt()        
@@ -79,59 +91,86 @@ function prompt() {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
-    });    
+    });        
 
-    rl.question(`root folder: (${defaults.folder}) `, folder => {
+    console.log("This utility will walk you through creating a package.json file.");
+    console.log("It only covers the most common items, and tries to guess sensible defaults.");
+    console.log("");
+    console.log("Press ^C at any time to quit.");
+    console.log("");
+
+    rl.question(`root path: (${defaultFolder}) `, folder => {        
+
+        folder = folder.trim().split(" ").join("-").toLowerCase()
 
         if(folder !== ""){
-
             try{
                 defaultName = folder.split('/')[folder.split('/').length - 1];
-            } catch(ex){
+                
+                if(defaultName === ""){
+                    defaultName = folder.split('/')[folder.split('/').length - 2];
+                }
+            } catch(ex){                
                 defaultName = folder;
             }
             
             defaults.name = defaultName;            
-            defaults.folder += folder;
+            defaultFolder += folder;
             defaults.bin = {};
-            defaults.bin[defaultName] = defaults.folder + '/bin/' + defaultName + '.js'
+            defaults.bin[defaultName] = './bin/' + defaultName + '.js';
+            defaults.main = './bin/' + defaultName + '.js';
         }
 
         rl.question(`package name: (${defaults.name}) `, name => {
             
-            if(name !== ""){
-                defaults.name = name;
-            }
+            defaults.name = name || defaults.name;
 
             rl.question(`version: (${defaults.version}) `, version => {
                 
-                if(version !== ""){
-                    defaults.version = version;
-                }
-
+                defaults.version = version || defaults.version;
+                
                 rl.question(`description: `, description => {
                                     
                     defaults.description = description;
                     
-                    rl.question(`git repository: `, repo => {
-                        
-                        defaults.repo = repo;
+                    rl.question(`bin: (${defaultName}) `, bin => {
+                        defaults.bin = bin || defaults.bin;
 
-                        rl.question(`keywords: `, keywords => {
+                        rl.question(`git repository: `, repo => {
                             
-                            defaults.keywords = keywords.split(' ');
+                            // defaults.repo = repo;
 
-                            rl.question(`author: `, author => {
+                            rl.question(`keywords: `, keywords => {
                                 
-                                defaults.author = author;
+                                defaults.keywords = keywords.split(' ');
 
-                                rl.question(`bin: (${defaultName}) `, bin => {
+                                rl.question(`author: `, author => {
+                                    
+                                    defaults.author = author;                                
 
-                                    if(bin !== ""){
-                                        defaults.bin = bin;
-                                    }
+                                    let pkg = `${defaultFolder}/package.json`;
 
-                                    rl.close();
+                                    pkg = pkg.replace('//','/', 'g')
+
+                                    console.log(`About to write to ${pkg}`)
+                                    console.log(JSON.stringify(defaults, null, 4))
+
+                                    rl.question(`Is this ok? (yes)  `, confirm => {                                        
+
+                                        if(confirm === "" || confirm === "y" || confirm === "yes"){
+                                            writePkgJson(pkg, JSON.stringify(defaults, null, 4), function(err) {
+                                                if(err) return console.log(err);
+
+                                                console.log("Your project is ready!");
+
+                                                rl.close();
+                                            });
+                                        } else {
+                                            console.log("Aborted!");
+
+                                            rl.close();
+                                        }
+                                    });
                                 });
                             });
                         });
@@ -140,17 +179,10 @@ function prompt() {
             });
         });
     });
-    
-    rl.on('close', () => {        
-        console.log(JSON.stringify(defaults, null, 4))
-        writePkgJson(defaults.folder + '/package.json', JSON.stringify(defaults, null, 4), function(err) {
-            if(err) {
-                return console.log(err);
-            }
 
-            console.log("The file was saved!");
-            process.exit(0);
-        });               
+    rl.on('close', () => {
+        console.log();
+        process.exit(0);        
     });
 }
 
