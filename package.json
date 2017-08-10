@@ -1,6 +1,6 @@
 {
   "name": "schemium",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/schemium.js",
   "scripts": {
