@@ -189,28 +189,38 @@ function createPackageJson(rl){
 
                                             //package.json
                                             writeAnyway(pkg, JSON.stringify(defaults, null, 4), function(err) {
-                                                if(err) return console.log(err);
-                                                
-                                                var js = "#!/usr/bin/env node\rrequire('cli-builder-api').exec();"
+                                                if(err) return console.log(err);                                                
 
-                                                //./bin/file.js
-                                                writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), js, function(err) {
-                                                    if(err) return console.log(err);                                                    
+                                                fs.readFile(path.resolve(__dirname, '../templates/bin.tpl'), function(oErr, binTpl) {
+                                                    if(oErr) return console.log(oErr);
 
-                                                    console.log("Installing Dependencies...");
-                                                    
-                                                    require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
-                                                        if (error) {
-                                                            console.error(`exec error: ${error}`);
-                                                            return;
-                                                        }
+                                                    //./bin/file.js
+                                                    writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
+                                                        if(err) return console.log(err);
                                                         
-                                                        process.stdout.write(stdout)
-                                                        console.log("Your project is ready!");
+                                                        fs.readFile(path.resolve(__dirname, '../templates/command.tpl'), function(oErr, cmdTpl) {
                                                         
-                                                        rl.close();
-                                                    });                                                                                                                                                          
-                                                });
+                                                            //./bin/file.js
+                                                            writeAnyway(path.resolve(defaultFolder,'commands/hello.js'), cmdTpl, function(err) {
+                                                                if(err) return console.log(err);                                                    
+
+                                                                console.log("Installing Dependencies...");
+                                                                
+                                                                require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
+                                                                    if (error) {
+                                                                        console.error(`exec error: ${error}`);
+                                                                        return;
+                                                                    }
+                                                                    
+                                                                    process.stdout.write(stdout)
+                                                                    console.log("Your project is ready!");
+                                                                    
+                                                                    rl.close();
+                                                                });                                                                                                                                                          
+                                                            });
+                                                        });
+                                                    });
+                                                });                                                
                                             });
                                         } else {
                                             console.log("Aborted!");
