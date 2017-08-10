@@ -201,7 +201,7 @@ function createPackageJson(rl){
                                                         fs.readFile(path.resolve(__dirname, '../templates/command.tpl'), function(oErr, cmdTpl) {
                                                         
                                                             //./bin/file.js
-                                                            writeAnyway(path.resolve(defaultFolder,'commands/hello.js'), cmdTpl, function(err) {
+                                                            writeAnyway(path.resolve(defaultFolder,'commands/print.js'), cmdTpl, function(err) {
                                                                 if(err) return console.log(err);                                                    
 
                                                                 console.log("Installing Dependencies...");
