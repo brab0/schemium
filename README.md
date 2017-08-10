@@ -1,12 +1,13 @@
-Crafter
+Schemium
 ==============
 Build Command Line Interface applications on a simple way.
 
-## How it Works?
-
 ## Instalation
-    $ npm install crafter --save
+    $ npm install schemium -g
 
+## Usage
+    $ schemium init
+    
 ## License
 ```
 MIT License

@@ -36,9 +36,9 @@ let defaults = {
         url: ""
     },
     dependencies: {
-        "crafter-api": "^0.0.5"
+        "schemium-api": "^0.0.5"
     },
-    crafter: {
+    schemium: {
         commands: {
             path: "commands/*.js"
         }
@@ -246,7 +246,7 @@ function writeAnyway(path, contents, cb) {
     });
 } 
 
-require('crafter-api').command({
+require('schemium-api').command({
     name: 'init',
     abbrev: 'i',
     main : main,

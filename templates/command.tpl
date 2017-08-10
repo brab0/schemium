@@ -13,7 +13,7 @@ function main(options) {
 }
 
 // our command's schema
-require('crafter-api').command({
+require('schemium-api').command({
     name: 'print',
     abbrev: 'p',
     main : main,
