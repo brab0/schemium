@@ -89,7 +89,7 @@ function prompt() {
         
         fs.stat(pkg, function(err, stat) {
             if(err == null) {                
-                rl.question(`\nThe path already exists and contains a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
+                rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
                     console.log("")
                     if(confirm === "" || confirm === "y" || confirm === "yes"){                        
                         setGitConf(rl, () => {

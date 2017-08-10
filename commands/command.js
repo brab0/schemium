@@ -99,7 +99,6 @@ function promptOptions(rl, cb, strOpt = ""){
                         } else {
                             cb(strOpt)
                         }
-                    
                     });                    
                 });
             });

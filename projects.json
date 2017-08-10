@@ -1,0 +1,13 @@
+[{
+    "name": "test0",
+    "command": "cmd0",    
+    "path": "/path/to/0"
+},{
+    "name": "test1",
+    "command": "cmd1",
+    "path": "/path/to/1"
+},{
+    "name": "test2",
+    "command": "cmd2",
+    "path": "/path/to/2"
+}]
