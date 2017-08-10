@@ -41,16 +41,16 @@ function promptCommand(rl){
         strCmd += `name: '${name.toLowerCase()}',\n`;        
         
         rl.question(`abbrev: (${name.substr(0,1).toLowerCase()}) `, abbrev => {            
-            strCmd += abbrev ? `abbrev: '${abbrev}',\n` : `abbrev: '${name.substr(0,1).toLowerCase()}',\n`;
+            strCmd += abbrev ? `\tabbrev: '${abbrev}',\n` : `\tabbrev: '${name.substr(0,1).toLowerCase()}',\n`;
             
-            strCmd += `main: main,\n`;
+            strCmd += `\tmain: main,\n`;
 
             rl.question(`description: `, description => {
-                strCmd += `description: '${description}'`;
+                strCmd += `\tdescription: '${description}'`;
 
                 rl.question(`Do you wanna add an option? (yes) `, confirm => {
                     if(confirm === "" || confirm === "y" || confirm === "yes"){
-                        strCmd += `,\noptions:[`;
+                        strCmd += `,\n\toptions:[`;
                         promptOptions(rl, opts => {
                             strCmd += `${opts}]`;
 
@@ -82,16 +82,16 @@ function promptOptions(rl, cb, strOpt = ""){
             prompt(rl)
         }
 
-        strOpt += `name: '${name.toLowerCase()}',\n`;        
+        strOpt += `\t\tname: '${name.toLowerCase()}',\n`;        
         
         rl.question(`abbrev: (${name.substr(0,1).toLowerCase()}) `, abbrev => {            
-            strOpt += abbrev ? `abbrev: '${abbrev}',\n` : `abbrev: '${name.substr(0,1).toLowerCase()}',\n`;
+            strOpt += abbrev ? `\t\tabbrev: '${abbrev}',\n` : `\t\tabbrev: '${name.substr(0,1).toLowerCase()}',\n`;
             
             rl.question(`type: `, type => {
-                strOpt += type ? `type: ${type},\n` : "type: Boolean,\n";
+                strOpt += type ? `\t\ttype: ${type},\n` : "\t\ttype: Boolean,\n";
 
                 rl.question(`description: `, description => {
-                    strOpt += `description: '${description}'\n}`;
+                    strOpt += `\t\tdescription: '${description}'\n\t}`;
                     
                     rl.question(`add another option? (yes) `, confirm => {
                         if(confirm === "" || confirm === "y" || confirm === "yes"){
@@ -109,8 +109,8 @@ function promptOptions(rl, cb, strOpt = ""){
 function writeTemplate(strCmd, cb){
     fs.readFile(path.resolve(__dirname, '../templates/command.tpl'), function(oErr, cmdTpl) {
         if(oErr) return console.log(oErr);
-
-        util.writeAnyway(path.resolve(__dirname, 'sample/test.js'), cmdTpl.toString().replace('<fields>', strCmd), function(err) {
+        console.log(path.resolve(process.cwd(), 'commands/test.js'))
+        util.writeAnyway(path.resolve(process.cwd(), 'sample/test.js'), cmdTpl.toString().replace('<fields>', strCmd), function(err) {
             if(err) return console.log(err);                                                    
 
             cb();

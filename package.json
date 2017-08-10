@@ -1,14 +1,10 @@
 {
   "name": "schemium",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/schemium.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "init": "node . init",
-    "command": "node . command",
-    "help": "node . --help",
-    "version": "node . -v"
+    "test": "echo \"Error: no test specified\" && exit 1"    
   },
   "repository": {
     "type": "git",
