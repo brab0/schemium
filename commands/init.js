@@ -36,9 +36,9 @@ let defaults = {
         url: ""
     },
     dependencies: {
-        "cli-builder-api": "^0.0.5"
+        "crafter-api": "^0.0.5"
     },
-    cliBuilder: {
+    crafter: {
         commands: {
             path: "commands/*.js"
         }
@@ -246,7 +246,7 @@ function writeAnyway(path, contents, cb) {
     });
 } 
 
-require('cli-builder-api').command({
+require('crafter-api').command({
     name: 'init',
     abbrev: 'i',
     main : main,

@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require('cli-builder-api').exec();
+require('crafter-api').exec();

@@ -13,7 +13,7 @@ function main(options) {
 }
 
 // our command's schema
-require('cli-builder-api').command({
+require('crafter-api').command({
     name: 'print',
     abbrev: 'p',
     main : main,
