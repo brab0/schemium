@@ -36,7 +36,7 @@ let defaults = {
         url: ""
     },
     dependencies: {
-        "schemium-api": "^0.0.5"
+        "schemium-api": "^0.0.1"
     },
     schemium: {
         commands: {
