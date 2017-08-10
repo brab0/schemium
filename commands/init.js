@@ -1,8 +1,7 @@
 const path = require('path');
 const cwd = process.cwd();
-var mkdirp = require('mkdirp');
 var fs = require('fs');
-var getDirName = require('path').dirname;
+var util = require('../util')
 var remoteOriginUrl = require('remote-origin-url');
 var defaultFolder = cwd + '/';
 var defaultName = "";
@@ -188,20 +187,20 @@ function createPackageJson(rl){
                                         if(confirm === "" || confirm === "y" || confirm === "yes"){
 
                                             //package.json
-                                            writeAnyway(pkg, JSON.stringify(defaults, null, 4), function(err) {
+                                            util.writeAnyway(pkg, JSON.stringify(defaults, null, 4), function(err) {
                                                 if(err) return console.log(err);                                                
 
                                                 fs.readFile(path.resolve(__dirname, '../templates/bin.tpl'), function(oErr, binTpl) {
                                                     if(oErr) return console.log(oErr);
 
                                                     //./bin/file.js
-                                                    writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
+                                                    util.writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
                                                         if(err) return console.log(err);
                                                         
                                                         fs.readFile(path.resolve(__dirname, '../templates/command.tpl'), function(oErr, cmdTpl) {
-                                                        
+                                                            if(oErr) return console.log(oErr);
                                                             //./bin/file.js
-                                                            writeAnyway(path.resolve(defaultFolder,'commands/print.js'), cmdTpl, function(err) {
+                                                            util.writeAnyway(path.resolve(defaultFolder,'commands/print.js'), cmdTpl, function(err) {
                                                                 if(err) return console.log(err);                                                    
 
                                                                 console.log("Installing Dependencies...");
@@ -237,14 +236,6 @@ function createPackageJson(rl){
         });
     });
 }
-
-function writeAnyway(path, contents, cb) {
-    mkdirp(getDirName(path), function (err) {
-        if (err) return cb(err);
-
-        fs.writeFile(path, contents, cb);
-    });
-} 
 
 require('schemium-api').command({
     name: 'init',

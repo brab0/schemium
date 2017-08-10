@@ -5,28 +5,10 @@
 */
 
 function main(options) {
-    if(options.hello){
-        console.log("Your CLI says Hello!");
-    } else if(options.goodbye){
-        console.log("Your CLI says Goodbye!");
-    }
+    console.log(options)
 }
 
 // our command's schema
 require('schemium-api').command({
-    name: 'print',
-    abbrev: 'p',
-    main : main,
-    description : "prints a greeting message",
-    options :[{
-        name : "hello",
-        abbrev : "hl",
-        type: Boolean,
-        description: "tells to program printing hello"
-    }, {
-        name : "goodbye",
-        abbrev : "bye",
-        type: Boolean,
-        description: "tells to program printing goodbye"
-    }]
+    <fields>
 });
