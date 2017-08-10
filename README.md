@@ -1,21 +1,11 @@
-CLI Builder
+Crafter
 ==============
 Build Command Line Interface applications on a simple way.
 
 ## How it Works?
 
 ## Instalation
-    $ npm install cli-builder --save
-
-## API
-### 
-
-```javascript
-
-```
-
-## That's all folks!
-
+    $ npm install crafter --save
 
 ## License
 ```
