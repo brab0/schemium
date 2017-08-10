@@ -7,7 +7,7 @@ var defaultFolder = cwd + '/';
 var defaultName = "";
 var defaultBin = "";
 let pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
-
+var command = require('../lib/command');
 try{
     defaultName = cwd.split('/')[cwd.split('/').length - 1];
 } catch(ex){
@@ -197,27 +197,23 @@ function createPackageJson(rl){
                                                     util.writeAnyway(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
                                                         if(err) return console.log(err);
                                                         
-                                                        fs.readFile(path.resolve(__dirname, '../templates/command.tpl'), function(oErr, cmdTpl) {
-                                                            if(oErr) return console.log(oErr);
-                                                            //./bin/file.js
-                                                            util.writeAnyway(path.resolve(defaultFolder,'commands/print.js'), cmdTpl, function(err) {
-                                                                if(err) return console.log(err);                                                    
-
-                                                                console.log("Installing Dependencies...");
+                                                        console.log("Installing Dependencies...");
                                                                 
-                                                                require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
-                                                                    if (error) {
-                                                                        console.error(`exec error: ${error}`);
-                                                                        return;
-                                                                    }
-                                                                    
-                                                                    process.stdout.write(stdout)
-                                                                    console.log("Your project is ready!");
-                                                                    
-                                                                    rl.close();
-                                                                });                                                                                                                                                          
-                                                            });
-                                                        });
+                                                        require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
+                                                            if (error) {
+                                                                console.error(`exec error: ${error}`);
+                                                                return;
+                                                            }
+                                                            
+                                                            process.stdout.write(stdout)
+                                                            console.log("Your project is ready!");
+                                                            
+                                                            var command = require('../lib/command');
+                                                            
+                                                            command.add(() => {
+                                                                rl.close();
+                                                            })                                                            
+                                                        }); 
                                                     });
                                                 });                                                
                                             });
