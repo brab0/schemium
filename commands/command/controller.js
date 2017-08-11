@@ -73,6 +73,7 @@ function promptOptions(cb){
         } else {                      
             parseTemplate(() => {
                 console.log('New command created!')
+                rl.close();
                 cb()
             });
         }                    
@@ -118,9 +119,10 @@ function addOption(cb){
                 rl.question(`description: `, description => {
                     option.description.value = description;
                     
+                    command.options.values.push(option);
+
                     rl.question(`add another option? (yes) `, confirm => {
-                        if(confirm === "" || confirm === "y" || confirm === "yes"){
-                            command.options.values.push(option);
+                        if(confirm === "" || confirm === "y" || confirm === "yes"){                            
                             addOption(cb)
                         } else {
                             cb()
@@ -138,11 +140,11 @@ function parseTemplate(cb){
 
         const parsedOptions = command.options.values.map(option => {
             return schemaOption
-                    .toString()
-                    .replace(option.name.tpl, option.name.value)
-                    .replace(option.abbrev.tpl, option.abbrev.value)
-                    .replace(option.type.tpl, option.type.value)
-                    .replace(option.description.tpl, option.description.value);
+                .toString()
+                .replace(option.name.tpl, option.name.value)
+                .replace(option.abbrev.tpl, option.abbrev.value)
+                .replace(option.type.tpl, option.type.value)
+                .replace(option.description.tpl, option.description.value);
         }).join(',');
         
         fs.readFile(path.resolve(__dirname, '../../templates/schema-command.tpl'), function(oErr, schemaCommand) {
@@ -155,19 +157,19 @@ function parseTemplate(cb){
                 .replace(command.main.tpl, command.main.value)
                 .replace(command.description.tpl, command.description.value)
                 .replace(command.options.tpl, parsedOptions);
-            
+
             const fileSchema = path.resolve(process.cwd(), `commands/${command.name.value}/schema.js`);
-                        
+
             writeFile(fileSchema, parsedSchema, function(err) {
                 if(err) return console.log(err);
 
                 fs.readFile(path.resolve(__dirname, '../../templates/model.tpl'), function(oErr, model) {
                     if(oErr) return console.log(oErr);
-                    
+
                     const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);
 
                     const fileModel = path.resolve(process.cwd(), `commands/${command.name.value}/model.js`);
-                            
+
                     writeFile(fileModel, parsedModel, function(err) {
                         if(err) return console.log(err);
 

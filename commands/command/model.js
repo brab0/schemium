@@ -1,8 +1,7 @@
 const controller = require('./controller');
 
-function command(options) {
-    add(() => {
-        console.log(options);
+function command() {
+    add(() => {        
         process.exit(0);
     })
 }

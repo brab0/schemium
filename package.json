@@ -4,7 +4,7 @@
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/schemium.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"    
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/brab0/schemium#readme",
   "dependencies": {
-    "schemium-api": "0.0.2",
+    "schemium-api": "^0.0.3",
     "mkdirp": "^0.5.1",
     "mout": "^1.0.0",
     "remote-origin-url": "^1.0.0"
@@ -26,8 +26,10 @@
     "schemium": "./bin/schemium.js"
   },
   "schemium": {
-    "commands": {
-      "path": "commands/**/schema.js"
+    "path": {
+      "schemas": "commands/**/schema.js",
+      "models": "commands/**/model.js",
+      "controllers": "commands/**/controller.js"
     }
   }
 }
