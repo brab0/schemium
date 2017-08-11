@@ -1,13 +1,13 @@
 const path = require('path');
 const cwd = process.cwd();
 var fs = require('fs');
-var util = require('../util')
+var util = require('../../util')
 var remoteOriginUrl = require('remote-origin-url');
 var defaultFolder = cwd + '/';
 var defaultName = "";
 var defaultBin = "";
 let pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
-var command = require('../lib/command');
+var command = require('../command/model');
 try{
     defaultName = cwd.split('/')[cwd.split('/').length - 1];
 } catch(ex){
@@ -46,7 +46,7 @@ let defaults = {
 
 defaults.bin[defaultName] = defaults.main;
 
-function main() {
+function init() {
     prompt()        
 }
 
@@ -109,12 +109,6 @@ function prompt() {
                 console.log(err.code);
             }
         });      
-    });
-    
-
-    rl.on('close', () => {
-        console.log();
-        process.exit(0);        
     });
 }
 
@@ -206,13 +200,24 @@ function createPackageJson(rl){
                                                             }
                                                             
                                                             process.stdout.write(stdout)
-                                                            console.log("Your project is ready!");
+                                                            console.log("");
                                                             
-                                                            var command = require('../lib/command');
-                                                            
-                                                            command.add(() => {
-                                                                rl.close();
-                                                            })                                                            
+                                                            rl.question(`Your project is ready! Do you want create some commands now? (yes)  `, confirm => {                                        
+
+                                                                if(confirm === "" || confirm === "y" || confirm === "yes"){                                                                    
+                                                                    
+                                                                    rl.close();
+
+                                                                    require('../lib/command').add(() => {
+                                                                        console.log();
+                                                                        process.exit(0);
+                                                                    })
+                                                                } else {
+                                                                    rl.close();
+                                                                    console.log();
+                                                                    process.exit(0);
+                                                                }
+                                                            }); 
                                                         }); 
                                                     });
                                                 });                                                
@@ -221,6 +226,8 @@ function createPackageJson(rl){
                                             console.log("Aborted!");
 
                                             rl.close();
+                                            console.log();
+                                            process.exit(0);
                                         }
                                     });
                                 });
@@ -233,9 +240,6 @@ function createPackageJson(rl){
     });
 }
 
-require('schemium-api').command({
-    name: 'init',
-    abbrev: 'i',
-    main : main,
-    description : "Create a new CLI project"
-});
+module.exports = {
+    init : init
+}

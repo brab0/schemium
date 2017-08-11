@@ -20,16 +20,14 @@
     "schemium-api": "0.0.2",
     "mkdirp": "^0.5.1",
     "mout": "^1.0.0",
-    "nopt": "^4.0.1",
-    "remote-origin-url": "^1.0.0",
-    "require-files": "^0.0.4"
+    "remote-origin-url": "^1.0.0"
   },
   "bin": {
     "schemium": "./bin/schemium.js"
   },
   "schemium": {
     "commands": {
-      "path": "commands/*.js"
+      "path": "commands/**/schema.js"
     }
   }
 }

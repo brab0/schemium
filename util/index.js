@@ -1,3 +1,3 @@
 module.exports = {
-    writeAnyway : require('./write-anyway')
+    writeFile : require('./write-file')
 }
