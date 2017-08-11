@@ -26,10 +26,9 @@ function isSchemiumPath(schemiumPath, validCB){
         cli : "",
         path : schemiumPath == '.' ? process.cwd() : schemiumPath
     };
-
     
-    try {
-        const pkg = require(path.resolve(config.path, 'package.json'))            
+    try {        
+        const pkg = require(path.resolve(config.path, 'package.json'));
         
         if(!pkg.schemium) validCB(false, config)
         
