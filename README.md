@@ -5,8 +5,19 @@ Build Command Line Interface applications on a simple way.
 ## Instalation
     $ npm install schemium -g
 
-## Usage
-    $ schemium init
+## Usage (`--help`)
+    Usage: schemium <command> [<option>]
+
+    command, c        add a new command
+
+    init, i           Create a new CLI project
+    --path, -p        path to create
+
+    project, p        projects
+    --use, -u
+    --list, -ls
+    --add, -a
+    --remove, -rm
     
 ## License
 ```
