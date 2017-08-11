@@ -32,7 +32,7 @@ function list(){
 
 function add(argPath, cb = null){    
     controller.isSchemiumPath(argPath, (valid, config) => {  
-        console.log(valid, config)
+        
         if(!valid) return console.log(`The current path is not a valid schemium\'s project: ${config.path}`);
         
         const projectsPath = path.resolve(__dirname, '../../projects.json');
