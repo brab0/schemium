@@ -15,5 +15,6 @@ function add(cb){
 }
 
 module.exports = {
-    command : command
+    command : command,
+    add : add
 }

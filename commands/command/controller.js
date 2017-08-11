@@ -5,10 +5,7 @@ const mout = require('mout');
 
 const { writeFile } = require('../../util');
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+let rl = {};
 
 let command = {
     name : {
@@ -33,7 +30,20 @@ let command = {
     }
 };
 
-function promptCommand(cb){    
+function promptCommand(cb){
+    rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.on('close', () => {
+        console.log()
+    })
+
+    console.log("This utility will walk you through creating a Schemium's command.");        
+    console.log("Press ^C at any time to quit.");
+    console.log("");
+
     rl.question(`name: `, name => {        
 
         if(!name){
@@ -61,12 +71,18 @@ function promptCommand(cb){
 }
 
 function promptOptions(cb){
+    console.log()
+
     rl.question(`Do you wanna add an option? (yes) `, confirm => {
         if(confirm === "" || confirm === "y" || confirm === "yes"){            
             addOption(() => {
                 parseTemplate(() => {
                     console.log('New command created!')
                     rl.close();
+                    console.log(`|-- commands/`)
+                    console.log(`|-- |-- ${command.name.value}/`)
+                    console.log(`|-- |-- |-- model.js`)
+                    console.log(`|-- |-- |-- schema.js`)
                     cb();
                 });
             })
@@ -74,6 +90,10 @@ function promptOptions(cb){
             parseTemplate(() => {
                 console.log('New command created!')
                 rl.close();
+                console.log(`|-- commands/`)
+                    console.log(`|-- |-- ${command.name.value}/`)
+                    console.log(`|-- |-- |-- model.js`)
+                    console.log(`|-- |-- |-- schema.js`)
                 cb()
             });
         }                    
@@ -121,7 +141,8 @@ function addOption(cb){
                     
                     command.options.values.push(option);
 
-                    rl.question(`add another option? (yes) `, confirm => {
+                    console.log();
+                    rl.question(`Do you wanna add another option? (yes) `, confirm => {
                         if(confirm === "" || confirm === "y" || confirm === "yes"){                            
                             addOption(cb)
                         } else {
