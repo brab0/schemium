@@ -1,0 +1,7 @@
+[
+    {
+        "name": "sample",
+        "cli": "sample",
+        "path": "/var/www/schemium/sample"
+    }
+]

@@ -70,13 +70,13 @@ function promptCommand(cb){
     });
 }
 
-function promptOptions(cb){
+function promptOptions(path, cb){
     console.log()
 
     rl.question(`Do you wanna add an option? (yes) `, confirm => {
         if(confirm === "" || confirm === "y" || confirm === "yes"){            
             addOption(() => {
-                parseTemplate(() => {
+                parseTemplate(path, () => {
                     console.log('New command created!')
                     rl.close();
                     console.log(`|-- commands/`)
@@ -87,7 +87,7 @@ function promptOptions(cb){
                 });
             })
         } else {                      
-            parseTemplate(() => {
+            parseTemplate(path, () => {
                 console.log('New command created!')
                 rl.close();
                 console.log(`|-- commands/`)
@@ -155,7 +155,9 @@ function addOption(cb){
     });
 }
 
-function parseTemplate(cb){
+function parseTemplate(pathProj, cb){
+    const cwd = pathProj || process.cwd();
+
     fs.readFile(path.resolve(__dirname, '../../templates/schema-option.tpl'), function(oErr, schemaOption) {
         if(oErr) return console.log(oErr);
 
@@ -179,7 +181,7 @@ function parseTemplate(cb){
                 .replace(command.description.tpl, command.description.value)
                 .replace(command.options.tpl, parsedOptions);
 
-            const fileSchema = path.resolve(process.cwd(), `commands/${command.name.value}/schema.js`);
+            const fileSchema = path.resolve(cwd, `commands/${command.name.value}/schema.js`);
 
             writeFile(fileSchema, parsedSchema, function(err) {
                 if(err) return console.log(err);
@@ -189,7 +191,7 @@ function parseTemplate(cb){
 
                     const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);
 
-                    const fileModel = path.resolve(process.cwd(), `commands/${command.name.value}/model.js`);
+                    const fileModel = path.resolve(cwd, `commands/${command.name.value}/model.js`);
 
                     writeFile(fileModel, parsedModel, function(err) {
                         if(err) return console.log(err);

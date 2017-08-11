@@ -1,0 +1,35 @@
+{
+    "name": "sample",
+    "version": "0.0.1",
+    "description": "",
+    "main": "./bin/sample.js",
+    "bin": {
+        "sample": "./bin/sample.js"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+"
+    },
+    "keywords": [
+        ""
+    ],
+    "author": "",
+    "license": "ISC",
+    "homepage": "#readme",
+    "bugs": {
+        "url": "/issues"
+    },
+    "dependencies": {
+        "schemium-api": "^0.0.3"
+    },
+    "schemium": {
+        "path": {
+            "schemas": "commands/**/schema.js",
+            "models": "commands/**/model.js",
+            "controllers": "commands/**/controller.js"
+        }
+    }
+}

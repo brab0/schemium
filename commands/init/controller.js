@@ -1,13 +1,17 @@
 const path = require('path');
-const cwd = process.cwd();
 const fs = require('fs');
-const { writeFile } = require('../../util')
 const remoteOriginUrl = require('remote-origin-url');
-var defaultFolder = cwd + '/';
-var defaultName = "";
-var defaultBin = "";
-let pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
-var command = require('../command/model');
+
+const { writeFile } = require('../../util')
+const project = require('../project/model');
+
+const cwd = process.cwd();
+let defaultFolder = cwd + '/';
+let defaultName = "";
+let defaultBin = "";
+let pkg = `${defaultFolder}/package.json`.replace(new RegExp('//','g'),'/');
+let command = require('../command/model');
+
 try{
     defaultName = cwd.split('/')[cwd.split('/').length - 1];
 } catch(ex){
@@ -47,11 +51,12 @@ let defaults = {
 };
 
 defaults.bin[defaultName] = defaults.main;
+let rl = {};
 
-function prompt() {
+function prompt(path) {
     const readline = require('readline');
     
-    const rl = readline.createInterface({
+    rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });        
@@ -64,55 +69,64 @@ function prompt() {
     console.log("Press ^C at any time to quit.");
     console.log("");
 
-    rl.question(`root path: (${defaultFolder}) `, folder => {
+    if(path){
+        console.log(`root path: ${path}`)
+        resolvePrompt(path)    
+    } else {
+        rl.question(`root path: (${defaultFolder}) `, folder => {
+            resolvePrompt(folder)
+        });
+    }    
+}
 
-        folder = folder.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase()
+function resolvePrompt(folder){
+    folder = folder.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase()
 
-        if(folder !== ""){
-            try{
-                defaultName = folder.split('/')[folder.split('/').length - 1];
-                
-                if(defaultName === ""){
-                    defaultName = folder.split('/')[folder.split('/').length - 2];
-                }
-            } catch(ex){                
-                defaultName = folder;
-            }
+    if(folder !== ""){
+        try{
+            defaultName = folder.split('/')[folder.split('/').length - 1];
             
-            defaults.name = defaultName;            
-            defaultFolder += folder;
-            defaults.bin = {};
-            defaults.bin[defaultName] = './bin/' + defaultName + '.js';
-            defaultBin = defaultName;
-            defaults.main = './bin/' + defaultName + '.js';
-
-            pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
+            if(defaultName === ""){
+                defaultName = folder.split('/')[folder.split('/').length - 2];
+            }
+        } catch(ex){                
+            defaultName = folder;
         }
         
-        fs.stat(pkg, function(err, stat) {
-            if(err == null) {                
-                rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
-                    console.log("")
-                    if(confirm === "" || confirm === "y" || confirm === "yes"){                        
-                        setGitConf(rl, () => {
-                            createPackageJson(rl)
-                        })
-                    } else {
-                        console.log("Aborted!");
+        defaults.name = defaultName;            
+        defaultFolder += folder;
+        defaults.bin = {};
+        defaults.bin[defaultName] = './bin/' + defaultName + '.js';
+        defaultBin = defaultName;
+        defaults.main = './bin/' + defaultName + '.js';
 
-                        rl.close();
-                    }
-                });
-            } else if(err.code == 'ENOENT') {
-                setGitConf(rl, () => {
-                    createPackageJson(rl)
-                })
-            } else {
-                console.log(err.code);
-            }
-        });      
+        pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
+    }
+    
+    fs.stat(pkg, function(err, stat) {
+        if(err == null) {                
+            rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
+                console.log("")
+                if(confirm === "" || confirm === "y" || confirm === "yes"){                        
+                    setGitConf(rl, () => {
+                        createPackageJson(rl)
+                    })
+                } else {
+                    console.log("Aborted!");
+
+                    rl.close();
+                }
+            });
+        } else if(err.code == 'ENOENT') {
+            setGitConf(rl, () => {
+                createPackageJson(rl)
+            })
+        } else {
+            console.log(err.code);
+        }
     });
 }
+
 
 function setGitConf(rl, cb){
     
@@ -184,45 +198,47 @@ function createPackageJson(rl){
 
                                             //package.json
                                             writeFile(pkg, JSON.stringify(defaults, null, 4), function(err) {
-                                                if(err) return console.log(err);                                                
+                                                if(err) return console.log(err);
+                                                
+                                                project.add(defaultFolder, () => {
+                                                    fs.readFile(path.resolve(__dirname, '../../templates/bin.tpl'), function(oErr, binTpl) {
+                                                        if(oErr) return console.log(oErr);
 
-                                                fs.readFile(path.resolve(__dirname, '../../templates/bin.tpl'), function(oErr, binTpl) {
-                                                    if(oErr) return console.log(oErr);
-
-                                                    //./bin/file.js
-                                                    writeFile(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
-                                                        if(err) return console.log(err);
-                                                        
-                                                        console.log("Installing Dependencies...");
-                                                                
-                                                        require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
-                                                            if (error) {
-                                                                console.error(`exec error: ${error}`);
-                                                                return;
-                                                            }
+                                                        //./bin/file.js
+                                                        writeFile(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
+                                                            if(err) return console.log(err);
                                                             
-                                                            process.stdout.write(stdout)
-                                                            console.log("");
-                                                            
-                                                            rl.question(`Your project is ready! Do you want create some commands now? (yes)  `, confirm => {                                        
-
-                                                                if(confirm === "" || confirm === "y" || confirm === "yes"){                                                                    
+                                                            console.log("Installing Dependencies...");
                                                                     
-                                                                    rl.close();
+                                                            require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
+                                                                if (error) {
+                                                                    console.error(`exec error: ${error}`);
+                                                                    return;
+                                                                }
+                                                                
+                                                                process.stdout.write(stdout)
+                                                                console.log("");
+                                                                
+                                                                rl.question(`Your project is ready! Do you want create some commands now? (yes)  `, confirm => {                                        
 
-                                                                    require('../command/model').add(() => {
+                                                                    if(confirm === "" || confirm === "y" || confirm === "yes"){                                                                    
+                                                                        
+                                                                        rl.close();
+
+                                                                        require('../command/model').add(defaultFolder, () => {
+                                                                            console.log();
+                                                                            process.exit(0);
+                                                                        })
+                                                                    } else {
+                                                                        rl.close();
                                                                         console.log();
                                                                         process.exit(0);
-                                                                    })
-                                                                } else {
-                                                                    rl.close();
-                                                                    console.log();
-                                                                    process.exit(0);
-                                                                }
+                                                                    }
+                                                                }); 
                                                             }); 
-                                                        }); 
+                                                        });
                                                     });
-                                                });                                                
+                                                })                                                
                                             });
                                         } else {
                                             console.log("Aborted!");

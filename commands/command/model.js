@@ -6,9 +6,9 @@ function command() {
     })
 }
 
-function add(cb){
+function add(path = null, cb){
     controller.promptCommand(() => {
-        controller.promptOptions(() => {
+        controller.promptOptions(path, () => {
             cb()
         })
     })
