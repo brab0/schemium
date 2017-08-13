@@ -219,7 +219,7 @@ function createPackageJson(rl){
                                                                 process.stdout.write(stdout)
                                                                 console.log("");
                                                                 
-                                                                rl.question(`Your project is ready! Do you want create some commands now? (yes)  `, confirm => {                                        
+                                                                rl.question(`Your project is ready! Do you want to create some commands now? (yes)  `, confirm => {                                        
 
                                                                     if(confirm === "" || confirm === "y" || confirm === "yes"){                                                                    
                                                                         

@@ -30,7 +30,7 @@ let command = {
     }
 };
 
-function promptCommand(cb){
+function promptCommand(path, cb){
     rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -44,11 +44,17 @@ function promptCommand(cb){
     console.log("Press ^C at any time to quit.");
     console.log("");
 
-    rl.question(`name: `, name => {        
+    addCommand(path, () => {
+        cb();
+    });
+}
+
+function addCommand(path, cb){
+    rl.question(`name: `, name => {
 
         if(!name){
             console.log('name is required!')
-            promptCommand(cb)
+            addCommand(path, cb)
         }
 
         command.name.value = name.replace(new RegExp(' ', 'g'), '-').toLowerCase();
@@ -62,8 +68,10 @@ function promptCommand(cb){
                 
                 rl.question(`description: `, description => {
                     command.name.value = name.toLowerCase();
-
-                    cb()
+                    
+                    promptOptions(path, () => {
+                        cb()
+                    });
                 });
             });
         });
@@ -77,31 +85,44 @@ function promptOptions(path, cb){
         if(confirm === "" || confirm === "y" || confirm === "yes"){            
             addOption(() => {
                 parseTemplate(path, () => {
-                    console.log('New command created!')
-                    rl.close();
-                    console.log(`|-- commands/`)
-                    console.log(`|-- |-- ${command.name.value}/`)
-                    console.log(`|-- |-- |-- model.js`)
-                    console.log(`|-- |-- |-- schema.js`)
-                    cb();
+
+                    renderTreeView(command);
+                
+                    rl.question(`Do you wanna add another command? (yes) `, confirm => {
+                        if(confirm === "" || confirm === "y" || confirm === "yes"){                        
+                            addCommand(path, cb)
+                        } else {                            
+                            cb();                            
+                        }
+                    });
                 });
-            })
-        } else {                      
+            });
+        } else {
             parseTemplate(path, () => {
-                console.log('New command created!')
-                rl.close();
-                console.log(`|-- commands/`)
-                    console.log(`|-- |-- ${command.name.value}/`)
-                    console.log(`|-- |-- |-- model.js`)
-                    console.log(`|-- |-- |-- schema.js`)
-                cb()
+                
+                renderTreeView(command);
+
+                rl.question(`Do you wanna add another command? (yes) `, confirm => {
+                    if(confirm === "" || confirm === "y" || confirm === "yes"){                        
+                        addCommand(path, cb)
+                    } else {                            
+                        cb();                            
+                    }
+                });
             });
         }                    
     });
 }
 
-function addOption(cb){
+function renderTreeView(command){
+    console.log('New command created!')
+    console.log(`|-- commands/`)
+    console.log(`|-- |-- ${command.name.value}/`)
+    console.log(`|-- |-- |-- model.js`)
+    console.log(`|-- |-- |-- schema.js`)
+}
 
+function addOption(cb){
     let option = {
         name : {
             tpl: "<name>",
@@ -155,8 +176,14 @@ function addOption(cb){
     });
 }
 
-function parseTemplate(pathProj, cb){
-    const cwd = pathProj || process.cwd();
+function parseTemplate(pathProj, cb){    
+    const { getByPath } = require('../project/controller');
+    const cwd = getByPath(pathProj || process.cwd());
+    const { schemium } = require(path.resolve(cwd, 'package.json'))
+    const configPaths = {
+        model : path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value)),
+        schema : path.resolve(cwd, schemium.path.schemas.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value))
+    }    
 
     fs.readFile(path.resolve(__dirname, '../../templates/schema-option.tpl'), function(oErr, schemaOption) {
         if(oErr) return console.log(oErr);
@@ -173,27 +200,29 @@ function parseTemplate(pathProj, cb){
         fs.readFile(path.resolve(__dirname, '../../templates/schema-command.tpl'), function(oErr, schemaCommand) {
             if(oErr) return console.log(oErr);
 
+            let modelPath = path.relative(configPaths.schema, configPaths.model).replace('../', '');
+
+            if(!new RegExp(/..\//).test(modelPath)) 
+                modelPath = './' + modelPath;
+
             const parsedSchema = schemaCommand
                 .toString()
                 .replace(command.name.tpl, command.name.value)
                 .replace(command.abbrev.tpl, command.abbrev.value)
                 .replace(command.main.tpl, command.main.value)
                 .replace(command.description.tpl, command.description.value)
-                .replace(command.options.tpl, parsedOptions);
+                .replace(command.options.tpl, parsedOptions)
+                .replace('<model-path>', modelPath);
 
-            const fileSchema = path.resolve(cwd, `commands/${command.name.value}/schema.js`);
-
-            writeFile(fileSchema, parsedSchema, function(err) {
+            writeFile(configPaths.schema, parsedSchema, function(err) {
                 if(err) return console.log(err);
 
                 fs.readFile(path.resolve(__dirname, '../../templates/model.tpl'), function(oErr, model) {
                     if(oErr) return console.log(oErr);
 
-                    const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);
+                    const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);                    
 
-                    const fileModel = path.resolve(cwd, `commands/${command.name.value}/model.js`);
-
-                    writeFile(fileModel, parsedModel, function(err) {
+                    writeFile(configPaths.model, parsedModel, function(err) {
                         if(err) return console.log(err);
 
                         cb()

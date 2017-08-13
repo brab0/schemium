@@ -1,6 +1,6 @@
 {
   "name": "schemium",
-  "version": "1.0.27",
+  "version": "1.0.29",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/schemium.js",
   "scripts": {
@@ -27,9 +27,9 @@
   },
   "schemium": {
     "path": {
-      "schemas": "commands/**/schema.js",
-      "models": "commands/**/model.js",
-      "controllers": "commands/**/controller.js"
+      "schemas": "commands/*/schema.js",
+      "models": "commands/*/model.js",
+      "controllers": "commands/*/controller.js"
     }
   }
 }

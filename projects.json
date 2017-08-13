@@ -1,1 +1,7 @@
-[]
+[
+    {
+        "name": "schemium",
+        "cli": "schemium",
+        "path": "/Users/Rodrigo/Development/schemium"
+    }
+]

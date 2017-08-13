@@ -1,17 +1,13 @@
 const controller = require('./controller');
 
 function command() {
-    add(() => {        
+    add(null,() => {        
         process.exit(0);
     })
 }
 
-function add(path = null, cb){
-    controller.promptCommand(() => {
-        controller.promptOptions(path, () => {
-            cb()
-        })
-    })
+function add(path = null, cb){    
+    controller.promptCommand(path, () => cb())
 }
 
 module.exports = {
