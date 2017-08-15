@@ -48,7 +48,7 @@ function getByPath(cwd){
     if(projects[index]){
         return projects[index].path;
     } else {
-        throw new Error('It seems this path is not a valid schemium\'s project. Try to execute \'schemium init\'')
+        throw new Error('It seems this path is not a valid schemium\'s project. Try to execute \'schemium project --add .\'')
     }
 }
 

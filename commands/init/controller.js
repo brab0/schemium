@@ -230,7 +230,7 @@ function createPackageJson(rl){
                                                                             process.exit(0);
                                                                         })
                                                                     } else {
-                                                                        const ignore = ['node_modules', 'util', 'package.json', 'bin', 'test', 'licence'];
+                                                                        const ignore = ['**/node_modules/**'];
 
                                                                         require('../project/model').treeView(defaultFolder, ignore, () => {
                                                                             rl.close();
