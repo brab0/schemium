@@ -25,5 +25,10 @@ require('schemium-api').command({
         abbrev: 'rm',
         type : String,
         description : ''
+    }, {
+        name: 'tree-view',
+        abbrev: 'tv',
+        type : String,
+        description : ''
     }]
 });

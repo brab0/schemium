@@ -84,10 +84,7 @@ function promptOptions(path, cb){
     rl.question(`Do you wanna add an option? (yes) `, confirm => {
         if(confirm === "" || confirm === "y" || confirm === "yes"){            
             addOption(() => {
-                parseTemplate(path, () => {
-
-                    renderTreeView(command);
-                
+                parseTemplate(path, () => {                                    
                     rl.question(`Do you wanna add another command? (yes) `, confirm => {
                         if(confirm === "" || confirm === "y" || confirm === "yes"){                        
                             addCommand(path, cb)
@@ -99,9 +96,6 @@ function promptOptions(path, cb){
             });
         } else {
             parseTemplate(path, () => {
-                
-                renderTreeView(command);
-
                 rl.question(`Do you wanna add another command? (yes) `, confirm => {
                     if(confirm === "" || confirm === "y" || confirm === "yes"){                        
                         addCommand(path, cb)
@@ -112,14 +106,6 @@ function promptOptions(path, cb){
             });
         }                    
     });
-}
-
-function renderTreeView(command){
-    console.log('New command created!')
-    console.log(`|-- commands/`)
-    console.log(`|-- |-- ${command.name.value}/`)
-    console.log(`|-- |-- |-- model.js`)
-    console.log(`|-- |-- |-- schema.js`)
 }
 
 function addOption(cb){

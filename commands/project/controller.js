@@ -45,7 +45,11 @@ function getByPath(cwd){
     const projects = require(path.resolve(__dirname, '../../projects.json'));    
     const index = projects.map(project => new RegExp(project.path).test(cwd)).indexOf(true);
     
-    return projects[index].path;
+    if(projects[index]){
+        return projects[index].path;
+    } else {
+        throw new Error('It seems this path is not a valid schemium\'s project. Try to execute \'schemium init\'')
+    }
 }
 
 module.exports = {

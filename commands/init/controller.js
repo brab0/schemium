@@ -230,9 +230,13 @@ function createPackageJson(rl){
                                                                             process.exit(0);
                                                                         })
                                                                     } else {
-                                                                        rl.close();
-                                                                        console.log();
-                                                                        process.exit(0);
+                                                                        const ignore = ['node_modules', 'util', 'package.json', 'bin', 'test', 'licence'];
+
+                                                                        require('../project/model').treeView(defaultFolder, ignore, () => {
+                                                                            rl.close();
+                                                                            console.log();
+                                                                            process.exit(0);                                                                            
+                                                                        })
                                                                     }
                                                                 }); 
                                                             }); 
