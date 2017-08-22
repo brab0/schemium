@@ -31,22 +31,22 @@ function list(){
 }
 
 function treeView(argPath, ignore, cb){
-    const dir_tree = require('tree-creator');
-
+    const { dir2tree } = require('../../util');
+    
     controller.isSchemiumPath(argPath, (valid, config) => {          
         if(!valid) return console.log(`The current path is not a valid schemium\'s project: ${config.path}`);
         
         const projectsPath = path.resolve(__dirname, '../../projects.json');
         const projects = require(projectsPath)
 
-        if(projects.some(project => project.path == config.path)){            
+        if(projects.some(project => project.path == config.path)){
             let opts = {
                 root: config.path,
                 label: '',
                 ignore: ignore
             };
 
-            dir_tree(opts, (er, tr) => {
+            dir2tree(opts, (er, tr) => {                
                 if (er) {
                     console.error(er);
                 } else {

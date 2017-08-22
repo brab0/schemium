@@ -17,11 +17,12 @@
   },
   "homepage": "https://github.com/brab0/schemium#readme",
   "dependencies": {
+    "archy": "^1.0.0",
+    "glob": "^7.1.2",
     "mkdirp": "^0.5.1",
     "mout": "^1.0.0",
     "remote-origin-url": "^1.0.0",
-    "schemium-api": "^0.0.3",
-    "tree-creator": "^1.0.4"
+    "schemium-api": "^0.0.3"
   },
   "bin": {
     "schemium": "./bin/schemium.js"

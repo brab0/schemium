@@ -28,6 +28,7 @@ function isSchemiumPath(schemiumPath, validCB){
     };
     
     try {        
+
         const pkg = require(path.resolve(config.path, 'package.json'));
         
         if(!pkg.schemium) validCB(false, config)
@@ -37,6 +38,7 @@ function isSchemiumPath(schemiumPath, validCB){
 
         validCB(true, config);
     } catch(ex) {
+        console.log(ex)
         validCB(false, config)
     }
 }

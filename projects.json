@@ -1,1 +1,22 @@
-[]
+[
+    {
+        "name": "test",
+        "cli": "test",
+        "path": "/var/www/test"
+    },
+    {
+        "name": "test",
+        "cli": "test",
+        "path": "/var/www/schemium/test"
+    },
+    {
+        "name": "teste",
+        "cli": "teste",
+        "path": "/var/www/teste"
+    },
+    {
+        "name": "clear",
+        "cli": "clear",
+        "path": "/var/www/clear"
+    }
+]

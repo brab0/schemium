@@ -229,10 +229,9 @@ function createPackageJson(rl){
                                                                             console.log();
                                                                             process.exit(0);
                                                                         })
-                                                                    } else {
-                                                                        const ignore = ['**/node_modules/**'];
-
-                                                                        require('../project/model').treeView(defaultFolder, ignore, () => {
+                                                                    } else {                                                                        
+                                                                        
+                                                                        require('../project/model').treeView(defaultFolder, () => {
                                                                             rl.close();
                                                                             console.log();
                                                                             process.exit(0);                                                                            

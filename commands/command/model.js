@@ -9,9 +9,7 @@ function command() {
 
 function add(path = null, cb){    
     controller.promptCommand(path, () => {
-        const ignore = ['**/node_modules/**'];
-
-        treeView(path, ignore, () => {
+        treeView(path, 'node_modules', () => {
             cb && cb();
         })        
     })
