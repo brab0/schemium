@@ -56,32 +56,32 @@ let rl = {};
 var inquirer = require('inquirer'); 
 
 function setProjectRoot(path){
-    if(path){
-        return new Promise(resolve => {
+    return new Promise(resolve => {
+        if(path){
             console.log(`root path: ${path}`)
-            resolve({ path : path.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase() })
-        })
-        .then(root => checkProjectRoot(root.path));
-    } else {
-        const cwd = process.cwd() + '/';
+            resolve(path.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase())
+        } else {
+            const cwd = process.cwd() + '/';
 
-        return inquirer.prompt({
-            type: 'input',
-            name: 'path',
-            message: 'root path:',
-            default: cwd,
-            filter: function(asw){
-                let path = asw.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase();
-                
-                if(new RegExp('^/').test(path))
-                    return path
-                else{
-                    return cwd + path
+            return inquirer.prompt({
+                type: 'input',
+                name: 'root',
+                message: 'root path:',
+                default: cwd,
+                filter: function(asw){
+                    let path = asw.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase();
+                    
+                    if(new RegExp('^/').test(path))
+                        return path;                        
+                    else{
+                        return cwd + path;
+                    }
                 }
-            }
-        })
-        .then(root => checkProjectRoot(root.path));
-    }
+            })
+            .then(path => resolve(path))
+        }
+    })
+    .then(path => checkProjectRoot(path));
 }
 
 function setPackageJson(root){     

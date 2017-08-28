@@ -13,8 +13,8 @@ function init(options) {
     console.log("");
 
     controller.setProjectRoot(options.path)
-    .then(path => {
-        rootPath = path;        
+    .then(path => {        
+        rootPath = path;
         return controller.setGit(rootPath);
     })
     .then(gitParams => controller.setPackageJson(rootPath))
