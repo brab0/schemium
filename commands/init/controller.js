@@ -53,99 +53,191 @@ let defaults = {
 defaults.bin[defaultName] = defaults.main;
 let rl = {};
 
-function prompt(path) {
-    const readline = require('readline');
-    
-    rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });        
+var inquirer = require('inquirer'); 
 
-    rl.on('close', () => {
-        console.log()
-    })
-
-    console.log("This utility will walk you through creating a Schemium's project.");        
-    console.log("Press ^C at any time to quit.");
-    console.log("");
-
+function setProjectRoot(path){
     if(path){
-        console.log(`root path: ${path}`)
-        resolvePrompt(path)    
+        return new Promise(resolve => {
+            console.log(`root path: ${path}`)
+            resolve({ path : path.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase() })
+        })
+        .then(root => checkProjectRoot(root.path));
     } else {
-        rl.question(`root path: (${defaultFolder}) `, folder => {
-            resolvePrompt(folder)
-        });
-    }    
+        const cwd = process.cwd() + '/';
+
+        return inquirer.prompt({
+            type: 'input',
+            name: 'path',
+            message: 'root path:',
+            default: cwd,
+            filter: function(asw){
+                let path = asw.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase();
+                
+                if(new RegExp('^/').test(path))
+                    return path
+                else{
+                    return cwd + path
+                }
+            }
+        })
+        .then(root => checkProjectRoot(root.path));
+    }
 }
 
-function resolvePrompt(folder){
-    folder = folder.trim().replace(new RegExp(' ', 'g'), '-').toLowerCase()
-
-    if(folder !== ""){
-        try{
-            defaultName = folder.split('/')[folder.split('/').length - 1];
-            
-            if(defaultName === ""){
-                defaultName = folder.split('/')[folder.split('/').length - 2];
-            }
-        } catch(ex){                
-            defaultName = folder;
+function setPackageJson(root){     
+    console.log(root)
+    return inquirer.prompt([{
+        type: 'input',
+        name: 'name',
+        message: 'package name:',
+        default: getProjectName(root)
+    }, {
+        type: 'input',
+        name: 'description',
+        message: 'description:'
+    }, {
+        type: 'input',
+        name: 'test',
+        message: 'test command:'
+    }, {
+        type: 'input',
+        name: 'keywords',
+        message: 'keywords:',
+        filter : function(asw) {
+            return asw.split(' ')
         }
+    }, {
+        type: 'input',
+        name: 'author',
+        message: 'author:'
+    }, {
+        type: 'input',
+        name: 'license',
+        message: 'license:',
+        default: 'ISC'
+    }]);
+}
+
+function getProjectName(folder){    
+    try{
+        let name = folder.split('/')[folder.split('/').length - 1];
         
-        defaults.name = defaultName;            
-        defaultFolder += folder;
-        defaults.bin = {};
-        defaults.bin[defaultName] = './bin/' + defaultName + '.js';
-        defaultBin = defaultName;
-        defaults.main = './bin/' + defaultName + '.js';
-
-        pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
-    }
-    
-    fs.stat(pkg, function(err, stat) {
-        if(err == null) {                
-            rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
-                console.log("")
-                if(confirm === "" || confirm === "y" || confirm === "yes"){                        
-                    setGitConf(rl, () => {
-                        createPackageJson(rl)
-                    })
-                } else {
-                    console.log("Aborted!");
-
-                    rl.close();
-                }
-            });
-        } else if(err.code == 'ENOENT') {
-            setGitConf(rl, () => {
-                createPackageJson(rl)
-            })
-        } else {
-            console.log(err.code);
+        if(name === ""){
+            name = folder.split('/')[folder.split('/').length - 2];
         }
+
+        return name;
+
+    } catch(ex){                
+        return folder;
+    }
+}
+
+function setGit(root){    
+    return new Promise(resolve => {
+        remoteOriginUrl(`${root}.git/config`, (err, url) => {
+            if(url){
+                resolve({
+                    repository: { 
+                        url: `git+${url}` 
+                    },
+                    bugs: { 
+                        url: `${url.split('.git').shift()}/issues`
+                    },
+                    homepage: `${url.split('.git').shift()}#readme`
+                })
+            } else {                
+                let prompt = inquirer.prompt({
+                    type: 'input',
+                    name: 'git',
+                    message: 'git url:'
+                })
+                .then(url => {
+                    if(url.git){
+                        return {
+                            repository: { 
+                                url: `git+${url.git}` 
+                            },
+                            bugs: { 
+                                url: `${url.git.split('.git').shift()}/issues`
+                            },
+                            homepage: `${url.git.split('.git').shift()}#readme`
+                        }
+                    } else{
+                        return;
+                    }                    
+                });
+
+                resolve(prompt)
+            }
+        });
     });
 }
 
+// function resolvePrompt(folder){
+//     if(folder !== ""){
 
-function setGitConf(rl, cb){
+//         defaults.name = getDefaultName(folder);        
+//         defaultFolder += folder;
+//         defaults.bin = {};
+//         defaults.bin[defaultName] = './bin/' + defaultName + '.js';
+//         defaultBin = defaultName;
+//         defaults.main = './bin/' + defaultName + '.js';
+
+//         pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
+//     }
     
-    remoteOriginUrl(`${defaultFolder}.git/config`, (err, url) => {
-        if(url){            
-            defaults.repository.url = `git+${url}`;
-            defaults.homepage = `${url.split('.git').shift()}#readme`;            
-            defaults.bugs.url = `${url.split('.git').shift()}/issues`;
+//     fs.stat(pkg, function(err, stat) {
+//         if(err == null) {                
+//             rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
+//                 console.log("")
+//                 if(confirm === "" || confirm === "y" || confirm === "yes"){                        
+//                     setGitConf(rl, () => {
+//                         createPackageJson(rl)
+//                     })
+//                 } else {
+//                     console.log("Aborted!");
 
-            cb();
-        } else {
-            rl.question(`git url: `, git => {
-                defaults.repository.url = `git+${git}`;
-                defaults.homepage = `${git}#readme`;            
-                defaults.bugs.url = `${git}/issues`;
+//                     rl.close();
+//                 }
+//             });
+//         } else if(err.code == 'ENOENT') {
+//             setGitConf(rl, () => {
+//                 createPackageJson(rl)
+//             })
+//         } else {
+//             console.log(err.code);
+//         }
+//     });
+// }
 
-                cb();
-            });
-        }
+function checkProjectRoot(root){    
+    return new Promise((resolve, reject) => {
+        fs.stat(`${root}/package.json`.replace('//','/', 'g'), function(err, stat) {            
+            if(err == null) {
+                return inquirer.prompt({
+                    type: 'confirm',
+                    name: 'continue',
+                    message: `The path ${root} already exists and has a package.json file.\nIf you decide to go on, the existent file will be overwritten.\nContinue anyway?`,
+                    default: true
+                })
+                .then(asw => {
+                    if(asw.continue){
+                        resolve(root)
+                    } else {
+                        reject("Aborted!");
+                    }
+                });           
+            } else if(err.code == 'ENOENT') {
+                resolve(root);
+            } else {
+                reject(err.code);                
+            }
+        });
+    })
+    .catch(ex => {
+        console.log(ex)
+        process.exit(0)
     });
 }
 
@@ -262,5 +354,7 @@ function createPackageJson(rl){
 }
 
 module.exports = {
-    prompt : prompt
+    setProjectRoot: setProjectRoot,
+    setPackageJson: setPackageJson,
+    setGit: setGit
 }

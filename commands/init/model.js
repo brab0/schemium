@@ -1,8 +1,26 @@
 const controller = require('./controller');
 
 function init(options) {
-    // controller.prompt(options.path)
-    pizza()
+    // controller.prompt(options.path)    
+    // pizza()
+
+    let pkg = {};
+    let rootPath = "";
+
+    console.log("");
+    console.log("This utility will walk you through creating a Schemium's project.");        
+    console.log("Press ^C at any time to quit.");
+    console.log("");
+
+    controller.setProjectRoot(options.path)
+    .then(path => {
+        rootPath = path;        
+        return controller.setGit(rootPath);
+    })
+    .then(gitParams => controller.setPackageJson(rootPath))
+    .then(answers => {
+        console.log(answers);
+    });
 }
 
 function pizza(){
@@ -10,6 +28,11 @@ function pizza(){
     
     console.log('Hi, welcome to Node Pizza');
     
+    inc.confirm({
+        toBeDelivered:'Is this for delivery?',
+        default: false
+    }).in
+
     var questions = [
         {
         type: 'confirm',
