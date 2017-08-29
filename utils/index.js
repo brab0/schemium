@@ -1,4 +1,4 @@
 module.exports = {
-    writeFile : require('./write-file'),
+    file : require('./file'),
     dir2tree : require('./dir2tree')
 }

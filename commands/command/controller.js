@@ -3,7 +3,7 @@ const path = require('path');
 const readline = require('readline');
 const mout = require('mout');
 
-const { writeFile } = require('../../util');
+const { file } = require('../../utils');
 
 let rl = {};
 
@@ -200,7 +200,7 @@ function parseTemplate(pathProj, cb){
                 .replace(command.options.tpl, parsedOptions)
                 .replace('<model-path>', modelPath);
 
-            writeFile(configPaths.schema, parsedSchema, function(err) {
+            file.write(configPaths.schema, parsedSchema, function(err) {
                 if(err) return console.log(err);
 
                 fs.readFile(path.resolve(__dirname, '../../templates/model.tpl'), function(oErr, model) {
@@ -208,7 +208,7 @@ function parseTemplate(pathProj, cb){
 
                     const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);                    
 
-                    writeFile(configPaths.model, parsedModel, function(err) {
+                    file.write(configPaths.model, parsedModel, function(err) {
                         if(err) return console.log(err);
 
                         cb()

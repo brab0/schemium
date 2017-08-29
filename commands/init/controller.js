@@ -1,61 +1,64 @@
-const path = require('path');
-const fs = require('fs');
-const remoteOriginUrl = require('remote-origin-url');
+const path = require('path'),
+      fs = require('fs'),
+      remoteOriginUrl = require('remote-origin-url'),
+      inquirer = require('inquirer'),
+      ora = require('ora'),
+      config = require('../../config');
 
-const { writeFile } = require('../../util')
-const project = require('../project/model');
+const project = require(path.resolve(config.paths.commands, 'project/model')),
+      command = require(path.resolve(config.paths.commands,'command/model'));
 
-const cwd = process.cwd();
-let defaultFolder = cwd + '/';
-let defaultName = "";
-let defaultBin = "";
-let pkg = `${defaultFolder}/package.json`.replace(new RegExp('//','g'),'/');
-let command = require('../command/model');
+const { file } = require(config.paths.utils);
 
-try{
-    defaultName = cwd.split('/')[cwd.split('/').length - 1];
-} catch(ex){
-    defaultName = cwd;
-}
+// const cwd = process.cwd();
+// let defaultFolder = cwd + '/';
+// let defaultName = "";
+// let defaultBin = "";
+// let pkg = `${defaultFolder}/package.json`.replace(new RegExp('//','g'),'/');
 
-let defaults = {
-    name : defaultName,
-    version : "0.0.1",
-    description : "",
-    main : "./bin/" + defaultName + '.js',
-    bin : {},
-    scripts : {
-        test: "echo \"Error: no test specified\" && exit 1"
-    },
-    repository: {
-        type: "git",
-        url: ""
-    },
-    keywords : [],
-    author : "",
-    license: "ISC",    
-    homepage: "",
-    bugs: {
-        url: ""
-    },
-    dependencies: {
-        "schemium-api": "^0.0.3"
-    },
-    schemium: {
-        path: {
-            schemas: "commands/**/schema.js",
-            models: "commands/**/model.js",
-            controllers: "commands/**/controller.js"
-        }
-    }
-};
 
-defaults.bin[defaultName] = defaults.main;
-let rl = {};
+// try{
+//     defaultName = cwd.split('/')[cwd.split('/').length - 1];
+// } catch(ex){
+//     defaultName = cwd;
+// }
 
-var inquirer = require('inquirer'); 
+// let defaults = {
+//     name : defaultName,
+//     version : "0.0.1",
+//     description : "",
+//     main : "./bin/" + defaultName + '.js',
+//     bin : {},
+//     scripts : {
+//         test: "echo \"Error: no test specified\" && exit 1"
+//     },
+//     repository: {
+//         type: "git",
+//         url: ""
+//     },
+//     keywords : [],
+//     author : "",
+//     license: "ISC",    
+//     homepage: "",
+//     bugs: {
+//         url: ""
+//     },
+//     dependencies: {
+//         "schemium-api": "^0.0.3"
+//     },
+//     schemium: {
+//         path: {
+//             schemas: "commands/**/schema.js",
+//             models: "commands/**/model.js",
+//             controllers: "commands/**/controller.js"
+//         }
+//     }
+// };
 
-function setProjectRoot(path){
+// defaults.bin[defaultName] = defaults.main;
+// let rl = {}; 
+
+function setProjectRoot(path){    
     return new Promise(resolve => {
         if(path){
             console.log(`root path: ${path}`)
@@ -65,7 +68,7 @@ function setProjectRoot(path){
 
             return inquirer.prompt({
                 type: 'input',
-                name: 'root',
+                name: 'path',
                 message: 'root path:',
                 default: cwd,
                 filter: function(asw){
@@ -84,67 +87,175 @@ function setProjectRoot(path){
     .then(path => checkProjectRoot(path));
 }
 
-function setPackageJson(root){     
-    console.log(root)
-    return inquirer.prompt([{
-        type: 'input',
-        name: 'name',
-        message: 'package name:',
-        default: getProjectName(root)
-    }, {
-        type: 'input',
-        name: 'description',
-        message: 'description:'
-    }, {
-        type: 'input',
-        name: 'test',
-        message: 'test command:'
-    }, {
-        type: 'input',
-        name: 'keywords',
-        message: 'keywords:',
-        filter : function(asw) {
-            return asw.split(' ')
+function setPackageJson(path) {    
+    return setGitInfo(path)
+    .then(gitInfo => {
+        return inquirer.prompt([{
+            type: 'input',
+            name: 'name',
+            message: 'package name:',
+            default: getProjectName(path)
+        }, {
+            type: 'input',
+            name: 'description',
+            message: 'description:'
+        }, {
+            type: 'input',
+            name: 'test',
+            message: 'test command:'
+        }, {
+            type: 'input',
+            name: 'keywords',
+            message: 'keywords:',
+            filter : function(asw) {
+                return asw.split(' ')
+            }
+        }, {
+            type: 'input',
+            name: 'author',
+            message: 'author:'
+        }, {
+            type: 'input',
+            name: 'license',
+            message: 'license:',
+            default: 'ISC'
+        }])
+        .then(answers => Object.assign(answers, gitInfo, {
+            version : "0.0.1",
+            main : "./bin/" + answers.name + '.js',
+            scripts : {
+                test: answers.test || "echo \"Error: no test specified\" && exit 1"
+            },
+            bin : {
+                [answers.name] : "./bin/" + answers.name + '.js'
+            },
+            dependencies: {
+                "schemium-api": "^0.0.3"
+            },
+            schemium: {
+                path: {
+                    schemas: "commands/**/schema.js",
+                    models: "commands/**/model.js",
+                    controllers: "commands/**/controller.js"
+                }
+            }
+        }))
+        .then(package => {
+            delete package.test;
+
+            return package;
+        })
+    })
+    .then(package => {        
+        const packageStringified = JSON.stringify(package, null, 4);
+
+        console.log(`\nAbout to write to: ${path}`)
+        console.log(packageStringified)
+
+        return inquirer.prompt({
+            type: 'confirm',
+            name: 'create',
+            message: 'Is this ok?',
+            default: true
+        })
+        .then(answer => Object.assign(answer, { packageStringified: packageStringified }))
+    })
+    .then(res => {        
+        if(res.create) {
+            const spinner = ora('Creating package.json file...').start();            
+            
+            return file.write({
+                to: path + '/package.json', 
+                content: res.packageStringified
+            })
+            .then(() => spinner);
+
+        } else {
+            console.log("Aborted!");
+            process.exit(0);
         }
-    }, {
-        type: 'input',
-        name: 'author',
-        message: 'author:'
-    }, {
-        type: 'input',
-        name: 'license',
-        message: 'license:',
-        default: 'ISC'
-    }]);
+    })
+    .then(spinner => {
+        return new Promise(resolve => {
+            setTimeout(function(){
+                spinner.succeed();
+                resolve(path);
+            }, 1000);
+        });
+    })
+    .catch(ex => {
+        console.log()
+        throw new Error(ex);
+    });
 }
 
-function getProjectName(folder){    
+function getProjectName(path){    
     try{
-        let name = folder.split('/')[folder.split('/').length - 1];
+        let name = path.split('/')[path.split('/').length - 1];
         
         if(name === ""){
-            name = folder.split('/')[folder.split('/').length - 2];
+            name = path.split('/')[path.split('/').length - 2];
         }
 
         return name;
 
     } catch(ex){                
-        return folder;
+        return path;
     }
 }
 
-function setGit(root){    
+function checkProjectRoot(data){    
+    return new Promise((resolve, reject) => {
+        fs.stat(`${data.path}/package.json`.replace('//','/', 'g'), function(err, stat) {            
+            if(err == null) {
+                console.log();
+                console.log(`The path ${data.path} already exists and has a package.json file.\nIf you decide to continue, the existent file will be overwritten.`);
+                
+                inquirer.prompt({
+                    type: 'confirm',
+                    name: 'continue',
+                    message: `Continue anyway?`,
+                    default: true
+                })
+                .then(asw => {
+                    console.log();
+                    resolve(Object.assign(asw, data))
+                });
+            } else if(err.code == 'ENOENT') {
+                resolve(Object.assign({continue: true}, data));
+            } else {
+                reject(err.code);                
+            }
+        });
+    })
+    .then(res => {
+        if(res.continue){
+            return res.path;
+        } else {
+            console.log("Aborted!");
+            process.exit(0);
+        }
+    })
+    .catch(ex => {
+        throw new Error(ex);
+    })
+}
+
+function setGitInfo(path){
     return new Promise(resolve => {
-        remoteOriginUrl(`${root}.git/config`, (err, url) => {
+        remoteOriginUrl(`${path}.git/config`, 
+        (err, url) => {
             if(url){
+                url = url.split('.git').shift();
+                
                 resolve({
                     repository: { 
-                        url: `git+${url}` 
+                        url: `git+${url}.git` 
                     },
                     bugs: { 
-                        url: `${url.split('.git').shift()}/issues`
+                        url: `${url}/issues`
                     },
-                    homepage: `${url.split('.git').shift()}#readme`
+                    homepage: `${url}#readme`
                 })
             } else {                
                 let prompt = inquirer.prompt({
@@ -174,187 +285,39 @@ function setGit(root){
     });
 }
 
-// function resolvePrompt(folder){
-//     if(folder !== ""){
+function buildProject(rootPath){    
+    return project.add(rootPath)
+    .then(() => file.writeFromTpl({
+        from: path.resolve(config.paths.templates, 'templates/bin.tpl'),
+        to: path.resolve(rootPath, defaults.bin[defaultBin])
+    }))
+    .then(res => {
+        console.log("Installing Dependencies...");
 
-//         defaults.name = getDefaultName(folder);        
-//         defaultFolder += folder;
-//         defaults.bin = {};
-//         defaults.bin[defaultName] = './bin/' + defaultName + '.js';
-//         defaultBin = defaultName;
-//         defaults.main = './bin/' + defaultName + '.js';
+        return require('child_process')
+        .exec('npm install', {
+            cwd : path
+        }, (error, stdout, stderr) => {
 
-//         pkg = `${defaultFolder}/package.json`.replace('//','/', 'g');
-//     }
-    
-//     fs.stat(pkg, function(err, stat) {
-//         if(err == null) {                
-//             rl.question(`\nThe path already exists and has a package.json.\nIf you decide to move on, the existent file will be overwritten.\nContinue anyway? (yes) `, confirm => {
-//                 console.log("")
-//                 if(confirm === "" || confirm === "y" || confirm === "yes"){                        
-//                     setGitConf(rl, () => {
-//                         createPackageJson(rl)
-//                     })
-//                 } else {
-//                     console.log("Aborted!");
-
-//                     rl.close();
-//                 }
-//             });
-//         } else if(err.code == 'ENOENT') {
-//             setGitConf(rl, () => {
-//                 createPackageJson(rl)
-//             })
-//         } else {
-//             console.log(err.code);
-//         }
-//     });
-// }
-
-function checkProjectRoot(root){    
-    return new Promise((resolve, reject) => {
-        fs.stat(`${root}/package.json`.replace('//','/', 'g'), function(err, stat) {            
-            if(err == null) {
-                return inquirer.prompt({
-                    type: 'confirm',
-                    name: 'continue',
-                    message: `The path ${root} already exists and has a package.json file.\nIf you decide to go on, the existent file will be overwritten.\nContinue anyway?`,
-                    default: true
-                })
-                .then(asw => {
-                    if(asw.continue){
-                        resolve(root)
-                    } else {
-                        reject("Aborted!");
-                    }
-                });           
-            } else if(err.code == 'ENOENT') {
-                resolve(root);
-            } else {
-                reject(err.code);                
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
             }
-        });
+            
+            process.stdout.write(stdout)
+            console.log("");                
+        }); 
     })
-    .catch(ex => {
-        console.log(ex)
-        process.exit(0)
-    });
-}
-
-function createPackageJson(rl){
-    rl.question(`package name: (${defaults.name}) `, name => {
-            
-        defaults.name = defaultBin = defaultName = name || defaults.name;
-        defaults.bin = {};
-        defaults.bin[defaultBin] = './bin/' + defaultBin + '.js';
-        defaults.main = './bin/' + defaultName + '.js';
-
-        rl.question(`bin: (${defaultBin}) `, bin => {
-            
-            if(bin){
-                defaultBin = bin;
-                defaults.bin = {};
-                defaults.bin[bin] = './bin/' + defaultBin + '.js';
-            }                      
-                    
-            rl.question(`version: (${defaults.version}) `, version => {
-            
-                defaults.version = version || defaults.version;
-            
-                rl.question(`description: `, description => {
-                                
-                    defaults.description = description;
-                
-                    rl.question(`test command: `, test => {
-
-                        defaults.scripts.test = test || defaults.scripts.test;                           
-
-                        rl.question(`keywords: `, keywords => {
-                        
-                            defaults.keywords = keywords.split(' ');
-
-                            rl.question(`author: `, author => {
-                            
-                                defaults.author = author;                                
-
-                                rl.question(`license: (${defaults.license}) `, license => {
-                            
-                                    defaults.license = license || defaults.license;                                                                                                                           
-
-                                    console.log(`About to write to ${pkg}`)
-                                    console.log(JSON.stringify(defaults, null, 4))
-
-                                    rl.question(`Is this ok? (yes)  `, confirm => {                                        
-
-                                        if(confirm === "" || confirm === "y" || confirm === "yes"){
-
-                                            //package.json
-                                            writeFile(pkg, JSON.stringify(defaults, null, 4), function(err) {
-                                                if(err) return console.log(err);
-                                                
-                                                project.add(defaultFolder, () => {
-                                                    fs.readFile(path.resolve(__dirname, '../../templates/bin.tpl'), function(oErr, binTpl) {
-                                                        if(oErr) return console.log(oErr);
-
-                                                        //./bin/file.js
-                                                        writeFile(path.resolve(defaultFolder,defaults.bin[defaultBin]), binTpl, function(err) {
-                                                            if(err) return console.log(err);
-                                                            
-                                                            console.log("Installing Dependencies...");
-                                                                    
-                                                            require('child_process').exec('npm install', {cwd : defaultFolder}, (error, stdout, stderr) => {
-                                                                if (error) {
-                                                                    console.error(`exec error: ${error}`);
-                                                                    return;
-                                                                }
-                                                                
-                                                                process.stdout.write(stdout)
-                                                                console.log("");
-                                                                
-                                                                rl.question(`Your project is ready! Do you want to create some commands now? (yes)  `, confirm => {                                        
-
-                                                                    if(confirm === "" || confirm === "y" || confirm === "yes"){                                                                    
-                                                                        
-                                                                        rl.close();
-
-                                                                        require('../command/model').add(defaultFolder, () => {
-                                                                            console.log();
-                                                                            process.exit(0);
-                                                                        })
-                                                                    } else {                                                                        
-                                                                        
-                                                                        require('../project/model').treeView(defaultFolder, () => {
-                                                                            rl.close();
-                                                                            console.log();
-                                                                            process.exit(0);                                                                            
-                                                                        })
-                                                                    }
-                                                                }); 
-                                                            }); 
-                                                        });
-                                                    });
-                                                })                                                
-                                            });
-                                        } else {
-                                            console.log("Aborted!");
-
-                                            rl.close();
-                                            console.log();
-                                            process.exit(0);
-                                        }
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
+    .then(() => inquirer.prompt({
+        type: 'confirm',
+        name: 'continue',
+        message: `Your project is ready! Do you want to create some commands now?`,
+        default: true
+    }));
 }
 
 module.exports = {
     setProjectRoot: setProjectRoot,
     setPackageJson: setPackageJson,
-    setGit: setGit
+    buildProject: buildProject
 }

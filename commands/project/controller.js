@@ -19,16 +19,24 @@ function renderList(projects){
     console.log(separator)
 }
 
-function isSchemiumPath(schemiumPath, validCB){
+function isSchemiumPath(schemiumPath){
     
+    // const projectsPath = path.resolve(__dirname, '../../projects.json');
+    // const projects = require(projectsPath)
+
+    // if(projects.some(project => project.path == config.path)){
+        
+    // } else {            
+    //     if(!valid) return console.log(`The current path is not a valid schemium\'s project: ${config.path}`);
+    // }
+
     let config = {
         name : "",
         cli : "",
         path : schemiumPath == '.' ? process.cwd() : schemiumPath
     };
     
-    try {        
-
+    return new Promise((resolve, reject) =>{
         const pkg = require(path.resolve(config.path, 'package.json'));
         
         if(!pkg.schemium) validCB(false, config)
@@ -36,11 +44,13 @@ function isSchemiumPath(schemiumPath, validCB){
         config.name = pkg.name;
         config.cli = Object.keys(pkg.bin)[0];   
 
-        validCB(true, config);
-    } catch(ex) {
-        console.log(ex)
-        validCB(false, config)
-    }
+        resolve(config);
+    })
+    .catch(ex => {
+        // console.log(ex)
+        console.log(`The current path is not a valid schemium\'s project: ${config.path}`)
+        validCB(config)
+    });
 }
 
 function getByPath(cwd){
