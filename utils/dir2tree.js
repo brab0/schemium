@@ -24,28 +24,32 @@ function add_node_to_tree(tree, parent_dir, node_to_add) {
     }
 }
 
-function dir_tree_creator(opts, cb) {
-    const def_ignore = ['node_modules/**', '.git/**'];
-    
-    opts.label = opts.label ? opts.label : path.basename(opts.root);
-    opts.ignore = (opts.ignore && Array.isArray(opts.ignore)) ? opts.ignore.concat(def_ignore) : def_ignore;  
-
-    var tree = {
-        label: opts.label,
-        nodes: []
-    };
-
-    get(opts.root, opts.ignore).forEach(files => {     
-        var parent_dir = path.parse(files).dir;
+function dir_tree_creator(opts) {
+    return new Promise((resolve, reject) => {    
+        const def_ignore = ['node_modules/**', '.git/**'];
         
-        if (parent_dir === opts.root) {
-            add_node_to_tree(tree, opts.label, path.basename(files));
-        } else {
-            add_node_to_tree(tree, path.basename(parent_dir), path.basename(files));
-        }        
-    });
+        opts.label = opts.label ? opts.label : path.basename(opts.root);
+        opts.ignore = (opts.ignore && Array.isArray(opts.ignore)) ? opts.ignore.concat(def_ignore) : def_ignore;  
 
-    cb(null, archy(tree).trim());
+        var tree = {
+            label: opts.label,
+            nodes: []
+        };
+
+        get(opts.root, opts.ignore).forEach(files => {     
+            var parent_dir = path.parse(files).dir;
+            
+            if (parent_dir === opts.root) {
+                add_node_to_tree(tree, opts.label, path.basename(files));
+            } else {
+                add_node_to_tree(tree, path.basename(parent_dir), path.basename(files));
+            }        
+        });
+        
+        console.log();
+        
+        resolve(archy(tree).trim());
+    });
 }
 
 function get(pattern, excludes){      

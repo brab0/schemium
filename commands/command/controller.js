@@ -1,225 +1,163 @@
-const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const mout = require('mout');
 
-const { file } = require('../../utils');
+const config = require('../../config');
+const { file, inquirer, ora } = require(config.paths.utils);
 
-let rl = {};
+// let schema = {};
 
-let command = {
-    name : {
-        tpl: "<name>",
-        value : ""
-    },
-    abbrev : {
-        tpl: "<abbrev>",
-        value : ""
-    },
-    main : {
-        tpl: "<main>",
-        value : ""
-    },
-    description : {
-        tpl: "<description>",
-        value : ""
-    },
-    options : {
-        tpl: "<options>",
-        values: []
-    }
-};
-
-function promptCommand(path, cb){
-    rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    rl.on('close', () => {
-        console.log()
-    })
-
-    console.log("This utility will walk you through creating a Schemium's command.");        
-    console.log("Press ^C at any time to quit.");
-    console.log("");
-
-    addCommand(path, () => {
-        cb();
-    });
+function prompt() {
+   return inquirer.prompt({
+      type: "input",
+      name: "name",
+      message: "name:",
+      validate: function (input) {
+         return input !== "" || 'name is required!'
+      },
+      filter: function(input){
+         return input.replace(new RegExp(' ', 'g'), '-').toLowerCase()
+      }
+   })
+   .then(input => {
+      return inquirer.prompt([{
+         type: "input",
+         name: "abbrev",
+         message: "abbrev:",
+         default: input.name.substr(0, 1)
+      }, {
+         type: "input",
+         name: "description",
+         message: "description:"
+      }])
+      .then(res => Object.assign(input, res))
+   });
 }
 
-function addCommand(path, cb){
-    rl.question(`name: `, name => {
+function addCommand(path) {
+   console.log();
 
-        if(!name){
-            console.log('name is required!')
-            addCommand(path, cb)
-        }
-
-        command.name.value = name.replace(new RegExp(' ', 'g'), '-').toLowerCase();
-        command.main.value = mout.string.camelCase(name)
-
-        rl.question(`abbrev: (${command.name.value.substr(0,1)}) `, abbrev => {
-            command.abbrev.value = abbrev || command.name.value.substr(0,1);
-            
-            rl.question(`main: (${command.main.value}) `, main => {
-                command.main.value = main || command.main.value;
-                
-                rl.question(`description: `, description => {
-                    command.name.value = name.toLowerCase();
-                    
-                    promptOptions(path, () => {
-                        cb()
-                    });
-                });
-            });
-        });
-    });
+   return prompt()
+   .then(res => {
+      let schema = Object.assign(res, { main : "controller." + mout.string.camelCase(res.name), options: [] });
+      
+      console.log("─────────────────────────────────────────────────────────────────")
+      return inquirer.prompt({
+         type: "confirm",
+         name: "option",
+         message: "Do you wanna add an option to this command?"
+      })
+      .then(res => {
+         if(res.option) return addOption(schema);
+         else return parseTemplate(schema, path);
+      })
+   })   
+   .then(() => inquirer.prompt({
+      type: "confirm",
+      name: "command",
+      message: "Do you wanna add another command?"
+   }))
+   .then(res => {
+      if(res.command) return addCommand(path);
+   })
 }
 
-function promptOptions(path, cb){
-    console.log()
+function addOption(schema) {
+   console.log()
 
-    rl.question(`Do you wanna add an option? (yes) `, confirm => {
-        if(confirm === "" || confirm === "y" || confirm === "yes"){            
-            addOption(() => {
-                parseTemplate(path, () => {                                    
-                    rl.question(`Do you wanna add another command? (yes) `, confirm => {
-                        if(confirm === "" || confirm === "y" || confirm === "yes"){                        
-                            addCommand(path, cb)
-                        } else {                            
-                            cb();                            
-                        }
-                    });
-                });
-            });
-        } else {
-            parseTemplate(path, () => {
-                rl.question(`Do you wanna add another command? (yes) `, confirm => {
-                    if(confirm === "" || confirm === "y" || confirm === "yes"){                        
-                        addCommand(path, cb)
-                    } else {                            
-                        cb();                            
-                    }
-                });
-            });
-        }                    
-    });
+   return prompt()
+   .then(input => {
+      return inquirer.prompt({
+         type: "list",
+         name: "type",
+         message: "type:",
+         choices: ['String', 'Boolean', 'Number']
+      })
+      .then(res => Object.assign(input, res))
+   })
+   .then(res => {
+      schema.options.push(res);
+      
+      console.log("─────────────────────────────────────────────────────────────────")
+      return inquirer.prompt({
+         type: "confirm",
+         name: "option",
+         message: "Do you wanna add another option?"
+      })
+   })
+   .then(res => {
+      if(res.option) return addOption(schema);
+      else return schema;
+   })
 }
 
-function addOption(cb){
-    let option = {
-        name : {
-            tpl: "<name>",
-            value : ""
-        },
-        abbrev : {
-            tpl: "<abbrev>",
-            value : ""
-        },
-        type : {
-            tpl: "<type>",
-            value : ""
-        },
-        description : {
-            tpl: "<description>",
-            value : ""
-        }
-    }
+function parseTemplate(schema, pathProj) {
+   const { getByPath } = require('../project/controller');
+   const cwd = getByPath(pathProj || process.cwd());
+   const { schemium } = require(path.resolve(cwd, 'package.json'))
+   const configPaths = {
+      model: path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value)),
+      schema: path.resolve(cwd, schemium.path.schemas.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value))
+   }
 
-    rl.question(`name: `, name => {        
+   return file.read(config.paths.templates + '/schema-option.tpl')
+   .then(schemaOption => {
+      const parsedOptions = command.options.values.map(option => {
+         return schemaOption
+            .toString()
+            .replace('<name>', schema.name)
+            .replace('<abbrev>', schema.abbrev)
+            .replace('<type>', schema.type)
+            .replace('<description>', schema.description);
+      }).join(',');
 
-        if(!name){
-            console.log('name is required!')
-            addOption(cb)
-        }
-
-        option.name.value = name.replace(new RegExp(' ', 'g'), '-').toLowerCase();
-        
-        rl.question(`abbrev: (${option.name.value.substr(0,1)}) `, abbrev => {            
-            option.abbrev.value = abbrev || option.name.value.substr(0,1);
-            
-            rl.question(`type: (Boolean)`, type => {
-                option.type.value = type || 'Boolean';
-
-                rl.question(`description: `, description => {
-                    option.description.value = description;
-                    
-                    command.options.values.push(option);
-
-                    console.log();
-                    rl.question(`Do you wanna add another option? (yes) `, confirm => {
-                        if(confirm === "" || confirm === "y" || confirm === "yes"){                            
-                            addOption(cb)
-                        } else {
-                            cb()
-                        }
-                    });                    
-                });
-            });
-        });
-    });
-}
-
-function parseTemplate(pathProj, cb){    
-    const { getByPath } = require('../project/controller');
-    const cwd = getByPath(pathProj || process.cwd());
-    const { schemium } = require(path.resolve(cwd, 'package.json'))
-    const configPaths = {
-        model : path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value)),
-        schema : path.resolve(cwd, schemium.path.schemas.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value))
-    }    
-
-    fs.readFile(path.resolve(__dirname, '../../templates/schema-option.tpl'), function(oErr, schemaOption) {
-        if(oErr) return console.log(oErr);
-
-        const parsedOptions = command.options.values.map(option => {
-            return schemaOption
-                .toString()
-                .replace(option.name.tpl, option.name.value)
-                .replace(option.abbrev.tpl, option.abbrev.value)
-                .replace(option.type.tpl, option.type.value)
-                .replace(option.description.tpl, option.description.value);
-        }).join(',');
-        
-        fs.readFile(path.resolve(__dirname, '../../templates/schema-command.tpl'), function(oErr, schemaCommand) {
-            if(oErr) return console.log(oErr);
-
+      return file.read(config.paths.templates + '/schema-option.tpl')
+         .then(schemaOption => {
+            const parsedOptions = command.options.values.map(option => {
+               return schemaOption
+                  .toString()
+                  .replace('<name>', schema.name)
+                  .replace('<abbrev>', schema.abbrev)
+                  .replace('<type>', schema.type)
+                  .replace('<description>', schema.description);
+            })
+            .join(',');
+         })
+         .then(() => file.read(config.paths.templates + '/schema-command.tpl'))
+         .then(res => {
             let modelPath = path.relative(configPaths.schema, configPaths.model).replace('../', '');
 
-            if(!new RegExp(/..\//).test(modelPath)) 
-                modelPath = './' + modelPath;
+            if (!new RegExp(/..\//).test(modelPath))
+               modelPath = './' + modelPath;
 
             const parsedSchema = schemaCommand
-                .toString()
-                .replace(command.name.tpl, command.name.value)
-                .replace(command.abbrev.tpl, command.abbrev.value)
-                .replace(command.main.tpl, command.main.value)
-                .replace(command.description.tpl, command.description.value)
-                .replace(command.options.tpl, parsedOptions)
-                .replace('<model-path>', modelPath);
+               .toString()
+               .replace('<name>', command.name.value)
+               .replace('<abbrev>', command.abbrev.value)
+               .replace('<main>', command.main.value)
+               .replace('<description>', command.description.value)
+               .replace('<options>', parsedOptions)
+               .replace('<model-path>', modelPath);
 
-            file.write(configPaths.schema, parsedSchema, function(err) {
-                if(err) return console.log(err);
+            file.write(configPaths.schema, parsedSchema)
+            .then(res => file.read(config.paths.templates + '/schema-command.tpl'))
 
-                fs.readFile(path.resolve(__dirname, '../../templates/model.tpl'), function(oErr, model) {
-                    if(oErr) return console.log(oErr);
+                  const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);
 
-                    const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);                    
+                  file.write(configPaths.model, parsedModel, function (err) {
+                     if (err) return console.log(err);
 
-                    file.write(configPaths.model, parsedModel, function(err) {
-                        if(err) return console.log(err);
-
-                        cb()
-                    });
-                });                  
+                     cb()
+                  });
+               });
             });
-        });
-    });
+         });
+      });
+   });
+
+   return;
 }
 
 module.exports = {
-    promptCommand : promptCommand,
-    promptOptions : promptOptions
+   addCommand: addCommand,
+   addOption: addOption
 }

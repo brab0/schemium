@@ -1,143 +1,29 @@
 const controller = require('./controller');
 
-function init(options) {
-    console.log("");
-    console.log("This utility will walk you through creating a Schemium's project.");        
-    console.log("Press ^C at any time to quit.");
-    console.log("");
+function init(options) {   
+   console.log("\nThis utility will walk you through creating a Schemium's project.");
+   console.log("Press ^C at any time to quit.\n");
 
-    controller.setProjectRoot(options.path)
-    .then(path => controller.setPackageJson(path))
-    .then(path => controller.buildProject(path))    
-    // .then(addCommands => {
-    //     if(asw.continue){
-    //         return require('../command/model').add(defaultFolder);
-    //     } else {
-    //         return require('../project/model').treeView(defaultFolder);
-    //     }
-    // })
-    .then(() => {
-        console.log();
-        process.exit(0);
-    })
-    .catch(ex => {
-        console.log(ex)
-        process.exit(0)
-    });
+   controller.setProjectRoot(options.path)
+   .then(path => controller.setPackageJson(path))
+   .then(res => controller.buildProject(res))
+   .then(res => {
+      if (res.continue) {
+         return require('../command/model').add(res.path);
+      } else {
+         return require('../project/model').treeView(res.path);
+      }
+   })
+   .then(() => {
+      console.log();
+      process.exit(0);
+   })
+   .catch(ex => {
+      console.log(ex);
+      process.exit(0);
+   });
 }
 
-// function pizza(){
-//     var inquirer = require('inquirer');    
-    
-//     console.log('Hi, welcome to Node Pizza');
-    
-//     inc.confirm({
-//         toBeDelivered:'Is this for delivery?',
-//         default: false
-//     }).in
-
-//     var questions = [
-//         {
-//         type: 'confirm',
-//         name: 'toBeDelivered',
-//         message: 'Is this for delivery?',
-//         default: false
-//         },
-//         {
-//         type: 'input',
-//         name: 'phone',
-//         message: 'What\'s your phone number?',
-//         validate: function (value) {
-//             var pass = value.match(/^([01]{1})?[-.\s]?\(?(\d{3})\)?[-.\s]?(\d{3})[-.\s]?(\d{4})\s?((?:#|ext\.?\s?|x\.?\s?){1}(?:\d+)?)?$/i);
-//             if (pass) {
-//             return true;
-//             }
-    
-//             return 'Please enter a valid phone number';
-//         }
-//         },
-//         {
-//         type: 'list',
-//         name: 'size',
-//         message: 'What size do you need?',
-//         choices: ['Large', 'Medium', 'Small'],
-//         filter: function (val) {
-//             return val.toLowerCase();
-//         }
-//         },
-//         {
-//         type: 'input',
-//         name: 'quantity',
-//         message: 'How many do you need?',
-//         validate: function (value) {
-//             var valid = !isNaN(parseFloat(value));
-//             return valid || 'Please enter a number';
-//         },
-//         filter: Number
-//         },
-//         {
-//         type: 'expand',
-//         name: 'toppings',
-//         message: 'What about the toppings?',
-//         choices: [
-//             {
-//             key: 'p',
-//             name: 'Pepperoni and cheese',
-//             value: 'PepperoniCheese'
-//             },
-//             {
-//             key: 'a',
-//             name: 'All dressed',
-//             value: 'alldressed'
-//             },
-//             {
-//             key: 'w',
-//             name: 'Hawaiian',
-//             value: 'hawaiian'
-//             }
-//         ]
-//         },
-//         {
-//         type: 'rawlist',
-//         name: 'beverage',
-//         message: 'You also get a free 2L beverage',
-//         choices: ['Pepsi', '7up', 'Coke']
-//         },
-//         {
-//         type: 'input',
-//         name: 'comments',
-//         message: 'Any comments on your purchase experience?',
-//         default: 'Nope, all good!'
-//         },
-//         {
-//         type: 'list',
-//         name: 'prize',
-//         message: 'For leaving a comment, you get a freebie',
-//         choices: ['cake', 'fries'],
-//         when: function (answers) {
-//             return answers.comments !== 'Nope, all good!';
-//         }
-//         }
-//     ];
-    
-//     inquirer.prompt(questions).then(function (answers) {
-//         const ora = require('ora');
-        
-//         const spinner = ora('Loading unicorns').start();
-            
-//         setTimeout(() => {
-//             spinner.color = 'yellow';
-//             spinner.text = 'Loading rainbows';
-//         }, 1000);
-
-//         setTimeout(function(){
-//             spinner.succeed();
-//             console.log('\nOrder receipt:');
-//             console.log(JSON.stringify(answers, null, '  '));
-//         }, 10000)
-//     });
-// }
-
 module.exports = {
-    init : init
+   init: init
 }

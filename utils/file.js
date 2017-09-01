@@ -17,23 +17,31 @@ function write(params) {
 }
 
 function writeFromTpl(params) {
+    return read(params.from)
+    .then(res => write({
+        to: params.to,
+        content: tpl
+    }))
+    .catch(ex => {
+        throw new Error(ex)
+    })
+}
+
+function read(from){
     return new Promise((resolve, reject) => {
-        fs.readFile(params.from, function(oErr, tpl) {
+        fs.readFile(from, function(oErr, tpl) {
             if(oErr) reject(oErr);
 
-            return write({
-                to: params.to,
-                content: tpl
-            })
-            .then(res => resolve(res))
+            return resolve(res);
         });
     })
     .catch(ex => {
         throw new Error(ex)
     })
-} 
+}
 
 module.exports = {
     write: write,
-    writeFromTpl: writeFromTpl
+    writeFromTpl: writeFromTpl,
+    exists : fs.stat
 }
