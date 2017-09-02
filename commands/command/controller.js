@@ -2,9 +2,7 @@ const path = require('path');
 const mout = require('mout');
 
 const config = require('../../config');
-const { file, inquirer, ora } = require(config.paths.utils);
-
-// let schema = {};
+const { file, inquirer, ora, chalk } = require(config.paths.utils);
 
 function prompt() {
    return inquirer.prompt({
@@ -14,23 +12,23 @@ function prompt() {
       validate: function (input) {
          return input !== "" || 'name is required!'
       },
-      filter: function(input){
+      filter: function (input) {
          return input.replace(new RegExp(' ', 'g'), '-').toLowerCase()
       }
    })
-   .then(input => {
-      return inquirer.prompt([{
-         type: "input",
-         name: "abbrev",
-         message: "abbrev:",
-         default: input.name.substr(0, 1)
-      }, {
-         type: "input",
-         name: "description",
-         message: "description:"
-      }])
-      .then(res => Object.assign(input, res))
-   });
+      .then(input => {
+         return inquirer.prompt([{
+            type: "input",
+            name: "abbrev",
+            message: "abbrev:",
+            default: input.name.substr(0, 1)
+         }, {
+            type: "input",
+            name: "description",
+            message: "description:"
+         }])
+         .then(res => Object.assign(input, res))
+      });
 }
 
 function addCommand(path) {
@@ -38,26 +36,27 @@ function addCommand(path) {
 
    return prompt()
    .then(res => {
-      let schema = Object.assign(res, { main : "controller." + mout.string.camelCase(res.name), options: [] });
-      
+      let schema = Object.assign(res, { main: mout.string.camelCase(res.name), options: [] });
+
       console.log("─────────────────────────────────────────────────────────────────")
       return inquirer.prompt({
          type: "confirm",
          name: "option",
-         message: "Do you wanna add an option to this command?"
+         message: `Do you wanna ${chalk.bold.green("add an option")} to this command?`
       })
       .then(res => {
-         if(res.option) return addOption(schema);
-         else return parseTemplate(schema, path);
+         if (res.option) return addOption(schema);
+         else return schema;
       })
-   })   
+   })
+   .then(schema => parseTemplate(schema, path))
    .then(() => inquirer.prompt({
       type: "confirm",
       name: "command",
-      message: "Do you wanna add another command?"
+      message: `Do you wanna ${chalk.bold.green("add another command")} to this command?`
    }))
    .then(res => {
-      if(res.command) return addCommand(path);
+      if (res.command) return addCommand(path);
    })
 }
 
@@ -70,91 +69,79 @@ function addOption(schema) {
          type: "list",
          name: "type",
          message: "type:",
-         choices: ['String', 'Boolean', 'Number']
+         choices: ['Boolean', 'String', 'Number']
       })
       .then(res => Object.assign(input, res))
    })
    .then(res => {
       schema.options.push(res);
-      
+
       console.log("─────────────────────────────────────────────────────────────────")
       return inquirer.prompt({
          type: "confirm",
          name: "option",
-         message: "Do you wanna add another option?"
+         message: `Do you wanna ${chalk.bold.green("add another option")}?`
       })
    })
    .then(res => {
-      if(res.option) return addOption(schema);
-      else return schema;
+      if (res.option) return addOption(schema);
+      else {            
+         return schema;
+      }
    })
 }
 
 function parseTemplate(schema, pathProj) {
+   console.log('building command\'s structure...')
+   
    const { getByPath } = require('../project/controller');
    const cwd = getByPath(pathProj || process.cwd());
    const { schemium } = require(path.resolve(cwd, 'package.json'))
    const configPaths = {
-      model: path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value)),
-      schema: path.resolve(cwd, schemium.path.schemas.replace(new RegExp(/\*\*/, 'g'), command.name.value).replace(new RegExp(/\*/, 'g'), command.name.value))
+      model: path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), schema.name).replace(new RegExp(/\*/, 'g'), schema.name)),
+      schema: path.resolve(cwd, schemium.path.schemas.replace(new RegExp(/\*\*/, 'g'), schema.name).replace(new RegExp(/\*/, 'g'), schema.name))
    }
 
    return file.read(config.paths.templates + '/schema-option.tpl')
    .then(schemaOption => {
-      const parsedOptions = command.options.values.map(option => {
+      return schema.options.map(option => {
          return schemaOption
             .toString()
             .replace('<name>', schema.name)
             .replace('<abbrev>', schema.abbrev)
             .replace('<type>', schema.type)
             .replace('<description>', schema.description);
-      }).join(',');
+      })
+      .join(',');
+   })
+   .then(parsedOptions => {
+      return file.read(config.paths.templates + '/schema-command.tpl')
+      .then(schemaCommand => {
+         let modelPath = path.relative(configPaths.schema, configPaths.model).replace('../', '');
 
-      return file.read(config.paths.templates + '/schema-option.tpl')
-         .then(schemaOption => {
-            const parsedOptions = command.options.values.map(option => {
-               return schemaOption
-                  .toString()
-                  .replace('<name>', schema.name)
-                  .replace('<abbrev>', schema.abbrev)
-                  .replace('<type>', schema.type)
-                  .replace('<description>', schema.description);
-            })
-            .join(',');
-         })
-         .then(() => file.read(config.paths.templates + '/schema-command.tpl'))
-         .then(res => {
-            let modelPath = path.relative(configPaths.schema, configPaths.model).replace('../', '');
+         if (!new RegExp(/..\//).test(modelPath))
+            modelPath = './' + modelPath;
 
-            if (!new RegExp(/..\//).test(modelPath))
-               modelPath = './' + modelPath;
-
-            const parsedSchema = schemaCommand
-               .toString()
-               .replace('<name>', command.name.value)
-               .replace('<abbrev>', command.abbrev.value)
-               .replace('<main>', command.main.value)
-               .replace('<description>', command.description.value)
-               .replace('<options>', parsedOptions)
-               .replace('<model-path>', modelPath);
-
-            file.write(configPaths.schema, parsedSchema)
-            .then(res => file.read(config.paths.templates + '/schema-command.tpl'))
-
-                  const parsedModel = model.toString().replace(new RegExp(command.main.tpl, 'g'), command.main.value);
-
-                  file.write(configPaths.model, parsedModel, function (err) {
-                     if (err) return console.log(err);
-
-                     cb()
-                  });
-               });
-            });
-         });
-      });
-   });
-
-   return;
+         return schemaCommand
+            .toString()
+            .replace('<name>', schema.name)
+            .replace('<abbrev>', schema.abbrev)
+            .replace('<main>', schema.main)
+            .replace('<description>', schema.description)
+            .replace('<options>', parsedOptions)
+            .replace('<model-path>', modelPath);
+      })
+   })   
+   .then(parsedSchema => file.write({
+      to: configPaths.schema, 
+      content: parsedSchema
+   }))
+   .then(() => file.read(config.paths.templates + '/model.tpl'))
+   .then(model => model.toString().replace(new RegExp('<main>', 'g'), schema.main))
+   .then(parsedModel => file.write({
+      to: configPaths.model, 
+      content: parsedModel
+   }));   
 }
 
 module.exports = {

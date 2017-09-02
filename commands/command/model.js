@@ -1,5 +1,7 @@
 const controller = require('./controller');
 const { treeView } = require('../project/model');
+const config = require('../../config');
+const { chalk } = require(config.paths.utils);
 
 function command() {
    add(null, () => {
@@ -8,7 +10,7 @@ function command() {
 }
 
 function add(path = null, cb) {
-   console.log("\nThis utility will walk you through creating a Schemium's command.");
+   console.log(`\nThis utility will walk you through creating a ${chalk.bold.green("Schemium's command")}.`);
    console.log("Press ^C at any time to quit.");
 
    return controller.addCommand(path)

@@ -32,7 +32,7 @@ function read(from){
         fs.readFile(from, function(oErr, tpl) {
             if(oErr) reject(oErr);
 
-            return resolve(res);
+            return resolve(tpl);
         });
     })
     .catch(ex => {
@@ -43,5 +43,6 @@ function read(from){
 module.exports = {
     write: write,
     writeFromTpl: writeFromTpl,
+    read : read,
     exists : fs.stat
 }

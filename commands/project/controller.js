@@ -1,7 +1,7 @@
 const path = require('path');
 
-function renderList(projects) {
-    var separator = '---------------------------------------------------------------------------------------------------------------------------';
+function renderList(projects) {                     
+    var separator = '───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────';
     var col = {
         name: '          NAME          ',
         cli: '          CLI          ',
@@ -20,16 +20,6 @@ function renderList(projects) {
 }
 
 function isSchemiumPath(schemiumPath) {
-
-    // const projectsPath = path.resolve(__dirname, '../../projects.json');
-    // const projects = require(projectsPath)
-
-    // if(projects.some(project => project.path == config.path)){
-
-    // } else {            
-    //     if(!valid) return console.log(`The current path is not a valid schemium\'s project: ${config.path}`);
-    // }
-
     let config = {
         name: "",
         cli: "",
@@ -39,27 +29,26 @@ function isSchemiumPath(schemiumPath) {
     return new Promise((resolve, reject) => {
         const pkg = require(path.resolve(config.path, 'package.json'));
 
-        if (!pkg.schemium) validCB(false, config)
+        if (!pkg.schemium || !getByPath(config.path)) reject()
 
         config.name = pkg.name;
         config.cli = Object.keys(pkg.bin)[0];
 
         resolve(config);
     })
-        .catch(ex => {
-            console.log(`The current path is not a valid schemium\'s project: ${config.path}`)
-            validCB(config)
-        });
+    .catch(ex => {
+        console.log(`The current path is not a valid schemium\'s project: ${config.path}`)
+    });
 }
 
-function getByPath(cwd) {
-    const projects = require(path.resolve(__dirname, '../../projects.json'));
-    const index = projects.map(project => new RegExp(project.path).test(cwd)).indexOf(true);
-
-    if (projects[index]) {
-        return projects[index].path;
+function getByPath(cwd) {    
+    const projectsList = require(path.resolve(__dirname, '../../projects.json'));
+    const project = projectsList.filter(project => project.path == cwd)[0];
+    
+    if (project) {
+        return project.path;
     } else {
-        throw new Error('It seems this path is not a valid schemium\'s project. Try to execute \'schemium project --add .\'')
+        throw new Error('It seems this path is not a valid schemium\'s project.');        
     }
 }
 
