@@ -93,7 +93,7 @@ function addOption(schema) {
 }
 
 function parseTemplate(schema, cwd) {
-   console.log('building command\'s structure...')
+   const spinner = ora('Building command\'s structure...').start();
    
    const { schemium } = require(path.resolve(cwd, 'package.json'))
    const configPaths = {
@@ -140,7 +140,13 @@ function parseTemplate(schema, cwd) {
    .then(parsedModel => file.write({
       to: configPaths.controller, 
       content: parsedModel
-   }));   
+   }))
+   .then(() => new Promise((resolve, reject) => {
+      setTimeout(function () {
+         spinner.succeed("Command\'s structure built!");
+         resolve();
+      }, 1000);
+   }));
 }
 
 module.exports = {

@@ -101,7 +101,7 @@ function setPackageJson(path) {
    .then(res => {
       return new Promise(resolve => {
          setTimeout(function () {
-            res.spinner.succeed();
+            res.spinner.succeed("package.json created!");
 
             resolve({
                path: path,
@@ -288,12 +288,10 @@ function installDependencies(path) {
       }, (error, stdout, stderr) => {
          if (error) reject(`exec error: ${error}`);
 
-         spinner.succeed();
-         console.log("");
-
-         process.stdout.write(stdout)
-         console.log("");
-
+         spinner.succeed('Dependencies Installed!');
+         
+         process.stdout.write("\n" + stdout + "\n")
+         
          resolve(path);
       });
    });

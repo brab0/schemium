@@ -1,10 +1,5 @@
 [
     {
-        "name": "nextip",
-        "cli": "nextip",
-        "path": "/var/www/nextip"
-    },
-    {
         "name": "test",
         "cli": "test",
         "path": "/var/www/schemium/test"
