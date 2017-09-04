@@ -3,5 +3,10 @@
         "name": "schemium",
         "cli": "schemium",
         "path": "/var/www/schemium"
+    },
+    {
+        "name": "test",
+        "cli": "test",
+        "path": "/var/www/schemium/test"
     }
 ]

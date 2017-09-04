@@ -45,9 +45,7 @@ function dir_tree_creator(opts) {
                 add_node_to_tree(tree, path.basename(parent_dir), path.basename(files));
             }        
         });
-        
-        console.log();
-        
+                
         resolve(archy(tree).trim());
     });
 }

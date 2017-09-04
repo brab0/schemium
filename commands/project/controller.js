@@ -20,16 +20,16 @@ function renderList(projects) {
 }
 
 function isSchemiumPath(schemiumPath) {
-    let config = {
-        name: "",
-        cli: "",
-        path: schemiumPath == '.' ? process.cwd() : schemiumPath
-    };
-
     return new Promise((resolve, reject) => {
+        let config = {
+            name: "",
+            cli: "",
+            path: schemiumPath == '.' ? process.cwd() : schemiumPath
+        };
+
         const pkg = require(path.resolve(config.path, 'package.json'));
 
-        if (!pkg.schemium || !getByPath(config.path)) reject()
+        if (!pkg.schemium) reject()
 
         config.name = pkg.name;
         config.cli = Object.keys(pkg.bin)[0];
@@ -37,19 +37,21 @@ function isSchemiumPath(schemiumPath) {
         resolve(config);
     })
     .catch(ex => {
-        console.log(`The current path is not a valid schemium\'s project: ${config.path}`)
+        throw new Error(`The current path is not a valid schemium\'s project: ${config.path}`)
     });
 }
 
-function getByPath(cwd) {    
-    const projectsList = require(path.resolve(__dirname, '../../projects.json'));
-    const project = projectsList.filter(project => project.path == cwd)[0];
-    
-    if (project) {
-        return project.path;
-    } else {
-        throw new Error('It seems this path is not a valid schemium\'s project.');        
-    }
+function getByPath(cwd) {
+    return new Promise((resolve, reject) => {
+        const projectsList = require(path.resolve(__dirname, '../../projects.json'));
+        const project = projectsList.filter(project => project.path == cwd)[0];
+        
+        if (project) {
+            resolve(project.path);
+        } else {
+            reject('It seems this path is not a valid schemium\'s project.');        
+        }
+    })
 }
 
 module.exports = {

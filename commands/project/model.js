@@ -37,7 +37,7 @@ function treeView(argPath, ignore) {
       label: '',
       ignore: ignore
    }))
-   .then(treeRedered => console.log(treeRedered))
+   .then(treeRedered => console.log(treeRedered + "\n"))
    .catch(err => {
       throw new Error(err);
    })
@@ -57,12 +57,10 @@ function add(argPath) {
 
       return projects;
    })
-   .then(projects => {
-      return file.write({
-         to: path.resolve(__dirname, '../../projects.json'),
-         content: JSON.stringify(projects, null, 4)
-      });
-   })
+   .then(projects => file.write({
+      to: path.resolve(__dirname, '../../projects.json'),
+      content: JSON.stringify(projects, null, 4)
+   }))
    .catch(err => {
       throw new Error(err);
    });

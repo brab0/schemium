@@ -18,7 +18,7 @@ function write(params) {
 
 function writeFromTpl(params) {
     return read(params.from)
-    .then(res => write({
+    .then(tpl => write({
         to: params.to,
         content: tpl
     }))

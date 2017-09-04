@@ -259,7 +259,9 @@ function buildProject(res) {
       to: path.resolve(res.path, res.package.bin[Object.keys(res.package.bin)[0]])
    }))
    .then(() => installDependencies(res.path))
+   .then(path => project.treeView(res.path))
    .then(path => {
+
       console.log('Your project is ready!');
 
       return inquirer.prompt({

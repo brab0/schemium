@@ -57,6 +57,7 @@ function addCommand(path) {
    }))
    .then(res => {
       if (res.command) return addCommand(path);
+      else return path;
    })
 }
 
@@ -91,11 +92,9 @@ function addOption(schema) {
    })
 }
 
-function parseTemplate(schema, pathProj) {
+function parseTemplate(schema, cwd) {
    console.log('building command\'s structure...')
    
-   const { getByPath } = require('../project/controller');
-   const cwd = getByPath(pathProj || process.cwd());
    const { schemium } = require(path.resolve(cwd, 'package.json'))
    const configPaths = {
       model: path.resolve(cwd, schemium.path.models.replace(new RegExp(/\*\*/, 'g'), schema.name).replace(new RegExp(/\*/, 'g'), schema.name)),
@@ -107,10 +106,10 @@ function parseTemplate(schema, pathProj) {
       return schema.options.map(option => {
          return schemaOption
             .toString()
-            .replace('<name>', schema.name)
-            .replace('<abbrev>', schema.abbrev)
-            .replace('<type>', schema.type)
-            .replace('<description>', schema.description);
+            .replace('<name>', option.name)
+            .replace('<abbrev>', option.abbrev)
+            .replace('<type>', option.type)
+            .replace('<description>', option.description);
       })
       .join(',');
    })
