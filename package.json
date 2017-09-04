@@ -1,6 +1,6 @@
 {
   "name": "schemium",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Build Command Line Interface applications on a simple way.",
   "main": "./bin/schemium.js",
   "scripts": {
@@ -17,8 +17,9 @@
   },
   "homepage": "https://github.com/brab0/schemium#readme",
   "dependencies": {
+    
     "remote-origin-url": "^1.0.0",
-    "schemium-api": "0.0.4"
+    "schemium-api": "0.0.6"
   },
   "bin": {
     "schemium": "./bin/schemium.js"
