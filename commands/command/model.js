@@ -53,7 +53,7 @@ function addCommand(path) {
    .then(() => inquirer.prompt({
       type: "confirm",
       name: "command",
-      message: `Do you wanna ${chalk.bold.green("add another command")} to this command?`
+      message: `Do you wanna ${chalk.bold.green("add another command")}?`
    }))
    .then(res => {
       if (res.command) return addCommand(path);

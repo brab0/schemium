@@ -258,6 +258,10 @@ function buildProject(res) {
       from: path.resolve(config.paths.templates, 'bin.tpl'),
       to: path.resolve(res.path, res.package.bin[Object.keys(res.package.bin)[0]])
    }))
+   .then(() => file.writeFromTpl({
+      from: path.resolve(config.paths.templates, 'gitignore.tpl'),
+      to: path.resolve(res.path, '.gitignore')
+   }))
    .then(() => installDependencies(res.path))
    .then(() => project.treeView(res.path))
    .then(() => {
