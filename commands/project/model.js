@@ -1,80 +1,61 @@
-const controller = require('./controller');
 const path = require('path');
-const { file, dir2tree } = require('../../utils');
 
-function project(options) {
-   if (options.use) {
-      use(options.use)
-   }
+function renderList(projects) {                     
+    var separator = '───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────';
+    var col = {
+        name: '          NAME          ',
+        cli: '          CLI          ',
+        path: '                                  PATH                                  '
+    }
 
-   if (options.list) {
-      list()
-   }
+    console.log(separator);
+    console.log(`|${col.name}|${col.cli}|${col.path}|`)
+    console.log(separator)
 
-   if (options.add) {
-      add(options.add)
-   }
+    projects.forEach(project => {
+        console.log(`| ${project.name + col.name.replace('NAME', '    ').slice(parseInt(project.name.length - 1), col.name.length - 2)}| ${project.cli + col.cli.replace('CLI', '   ').slice(parseInt(project.cli.length - 1), col.cli.length - 2)}| ${project.path + col.path.replace('PATH', '    ').slice(parseInt(project.path.length - 1), col.path.length - 2)}|`);
+    })
 
-   if (options.remove) {
-      remove(options.remove)
-   }
+    console.log(separator)
 }
 
-function use(value) {
-   console.log(value)
+function isSchemiumPath(schemiumPath) {
+    return new Promise((resolve, reject) => {
+        let config = {
+            name: "",
+            cli: "",
+            path: schemiumPath == '.' ? process.cwd() : schemiumPath
+        };
+
+        const pkg = require(path.resolve(config.path, 'package.json'));
+
+        if (!pkg.schemium) reject()
+
+        config.name = pkg.name;
+        config.cli = Object.keys(pkg.bin)[0];
+
+        resolve(config);
+    })
+    .catch(ex => {
+        throw new Error(`The current path is not a valid schemium\'s project: ${config.path}`)
+    });
 }
 
-function list() {
-   var projects = require(path.resolve(__dirname, '../../projects.json'));
-
-   controller.renderList(projects);
-}
-
-function treeView(argPath, ignore) {
-   return controller.isSchemiumPath(argPath)
-   .then(config => dir2tree({
-      root: config.path,
-      label: '',
-      ignore: ignore
-   }))
-   .then(treeRedered => console.log(treeRedered + "\n"))
-   .catch(err => {
-      throw new Error(err);
-   })
-}
-
-function add(argPath) {
-   return controller.isSchemiumPath(argPath)
-   .then(config => {
-      let projects = require(path.resolve(__dirname, '../../projects.json'))
-      const index = projects.map(project => project.path).indexOf(config.path)
-
-      if (index == -1) {
-         projects.push(config);
-      } else {
-         projects[index] = config;
-      }
-
-      return projects;
-   })
-   .then(projects => file.write({
-      to: path.resolve(__dirname, '../../projects.json'),
-      content: JSON.stringify(projects, null, 4)
-   }))
-   .catch(err => {
-      throw new Error(err);
-   });
-}
-
-function remove(value) {
-   console.log(value)
+function getByPath(cwd) {
+    return new Promise((resolve, reject) => {
+        const projectsList = require(path.resolve(__dirname, '../../projects.json'));
+        const project = projectsList.filter(project => project.path == cwd)[0];
+        
+        if (project) {
+            resolve(project.path);
+        } else {
+            reject('It seems this path is not a valid schemium\'s project.');        
+        }
+    })
 }
 
 module.exports = {
-   project: project,
-   use: use,
-   list: list,
-   add: add,
-   remove: remove,
-   treeView: treeView
+    renderList: renderList,
+    isSchemiumPath: isSchemiumPath,
+    getByPath: getByPath
 }

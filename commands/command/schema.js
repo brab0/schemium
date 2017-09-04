@@ -1,8 +1,8 @@
-const model = require('./model');
+const controller = require('./controller');
 
 require('schemium-api').command({
     name: 'command',
     abbrev: 'c',
-    main : model.command,
+    main : controller.command,
     description : "add a new command"
 });

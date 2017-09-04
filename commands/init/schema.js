@@ -1,9 +1,9 @@
-const model = require('./model');
+const controller = require('./controller');
 
 require('schemium-api').command({
     name: 'init',
     abbrev: 'i',
-    main : model.init,
+    main : controller.init,
     description : "Create a new CLI project",
     options : [{
         name: 'path',

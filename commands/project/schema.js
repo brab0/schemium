@@ -1,9 +1,9 @@
-const model = require('./model.js')
+const controller = require('./controller.js')
 
 require('schemium-api').command({
     name: 'project',
     abbrev: 'p',
-    main : model.project,
+    main : controller.project,
     description : 'projects',
     options : [{
         name: 'use',

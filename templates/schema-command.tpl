@@ -1,9 +1,9 @@
-const model = require('<model-path>');
+const controller = require('<controller-path>');
 
 require('schemium-api').command({
     name: '<name>',
     abbrev: '<abbrev>',
-    main : model.<main>,
+    main : controller.<main>,
     description : '<description>',
     options : [<options>]
 });
