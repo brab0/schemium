@@ -259,8 +259,8 @@ function buildProject(res) {
       to: path.resolve(res.path, res.package.bin[Object.keys(res.package.bin)[0]])
    }))
    .then(() => installDependencies(res.path))
-   .then(path => project.treeView(res.path))
-   .then(path => {
+   .then(() => project.treeView(res.path))
+   .then(() => {
 
       console.log('Your project is ready!');
 
@@ -270,7 +270,7 @@ function buildProject(res) {
          message: `Do you want to create some commands now?`,
          default: true
       })
-      .then(command => Object.assign({ path: path }, command))
+      .then(command => Object.assign({ path: res.path }, command))
    });
 }
 
