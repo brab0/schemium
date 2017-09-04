@@ -2,7 +2,7 @@ const path = require('path');
 const mout = require('mout');
 
 const config = require('../../config');
-const { file, inquirer, ora, chalk } = require(config.paths.utils);
+const { file, inquirer, ora, chalk } = require('schemium-api').utils;
 
 function prompt() {
    return inquirer.prompt({

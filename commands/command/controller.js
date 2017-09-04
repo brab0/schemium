@@ -1,7 +1,7 @@
 const model = require('./model');
 const { treeView } = require('../project/controller');
 const config = require('../../config');
-const { chalk } = require(config.paths.utils);
+const { chalk } = require('schemium-api').utils;
 
 function command() {
    add(null, () => {

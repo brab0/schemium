@@ -1,6 +1,6 @@
 const model = require('./model');
 const path = require('path');
-const { file, dir2tree } = require('../../utils');
+const { file, dir2tree } = require('schemium-api').utils;
 
 function project(options) {
    if (options.use) {

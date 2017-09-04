@@ -5,7 +5,7 @@ const path = require('path'),
 const project = require(path.resolve(config.paths.commands, 'project/controller')),
       command = require(path.resolve(config.paths.commands, 'command/controller'));
 
-const { file, inquirer, ora } = require(config.paths.utils);
+const { file, inquirer, ora } = require('schemium-api').utils;
 
 function setProjectRoot(path) {
    return new Promise(resolve => {
