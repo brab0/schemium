@@ -49,7 +49,7 @@ function setPackageJson(path) {
          [answers.name]: "./bin/" + answers.name + '.js'
       },
       dependencies: {
-         "schemium-api": "^0.0.3"
+         "schemium-api": "^0.0.6"
       },
       schemium: {
          path: {
