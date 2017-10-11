@@ -21,13 +21,13 @@ Build Command Line Interface applications on a simple way.
 
 ## Roadmap
     scm init --name "shooter-cli"
-    scm command --add "add" --template "prompt"
+    scm command --add "add" --template "prompt"
     scm command --add "list" --template "list"
     scm command --add "fire"
     scm publish
 
     scm init --name "angularjs-cli"
-    scm command --add "init"
+    scm command --add "init"
     scm command --add "add" --template "prompt"
     scm publish
 
