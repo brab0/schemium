@@ -20,26 +20,26 @@ Build Command Line Interface applications on a simple way.
     --remove, -rm
 
 ## Roadmap
-    - scm init --name "shooter-cli"
-    - scm command --add "add" --template "prompt"
-    - scm command --add "list" --template "list"   
-    - scm command --add "fire"
-    - scm publish    
------------------------------------------------------------    
-    - scm init --name "angularjs-cli"
-    - scm command --add "init"
-    - scm command --add "add" --template "prompt"
-    - scm publish
------------------------------------------------------------
-    - scm init --name "uimmer-cli"
-    - scm module --add **
-    - scm module --add **/frontend
-    - scm add scm-angularjs@brab0:ng
-    - scm remove scm-angularjs
-    - my-cli new@ng --template "blank"
-    - my-cli ng:add --module "sample" --test --service --controller --view
-    - my-cli console ng
-    - my-cli@ng> add  --module "sample"
+    scm init --name "shooter-cli"
+    scm command --add "add" --template "prompt"
+    scm command --add "list" --template "list"   
+    scm command --add "fire"
+    scm publish    
+
+    scm init --name "angularjs-cli"
+    scm command --add "init"
+    scm command --add "add" --template "prompt"
+    scm publish
+
+    scm init --name "uimmer-cli"
+    scm module --add **
+    scm module --add **/frontend
+    scm add scm-angularjs@brab0:ng
+    scm remove scm-angularjs
+    my-cli new@ng --template "blank"
+    my-cli ng:add --module "sample" --test --service --controller --view
+    my-cli console ng
+    my-cli@ng> add  --module "sample"
 
 ## License
 ```
