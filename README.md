@@ -20,7 +20,8 @@ Build Command Line Interface applications on a simple way.
     --remove, -rm
 
 ## Roadmap
-    scm init --name "shooter-cli"
+```
+    scm init --name "shooter-cli"
     scm command --add "add" --template "prompt"
     scm command --add "list" --template "list"
     scm command --add "fire"
@@ -39,7 +40,8 @@ Build Command Line Interface applications on a simple way.
     my-cli new@ng --template "blank"
     my-cli ng:add --module "sample" --test --service --controller --view
     my-cli console ng
-    my-cli@ng> add  --module "sample"
+    my-cli@ng> add  --module "sample"
+```
 
 ## License
 ```
